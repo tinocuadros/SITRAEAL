@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<title>SITRAEAL - Sistema de Trazabilidad</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+<style>
+        /* Efecto de elevación en las tarjetas del Dashboard */
+        .card:hover {
+            transform: translateY(-8px);
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        /* ANIMACIONES CSS PARA ALERTAS (RESOLUCIÓN 4272) */
+        
+        /* Parpadeo Amarillo: Próximo a vencer (15 días) */
+        @keyframes parpadeo-preventivo {
+            0% { transform: scale(1); color: white; }
+            50% { transform: scale(1.15); color: #ffc107; } 
+            100% { transform: scale(1); color: white; }
+        }
+
+        /* Parpadeo Rojo: Equipo Vencido (Crítico) */
+        @keyframes parpadeo-critico {
+            0% { transform: scale(1); color: white; }
+            50% { transform: scale(1.25); color: #dc3545; } 
+            100% { transform: scale(1); color: white; }
+        }
+
+        .animar-alerta { animation: parpadeo-preventivo 1.5s infinite; }
+        .animar-peligro { animation: parpadeo-critico 0.8s infinite; }
+
+        /* Contenedor de notificaciones Toast */
+        .toast-container { 
+            position: fixed; 
+            bottom: 25px; 
+            right: 25px; 
+            z-index: 2000; 
+        }
+
+        /* Estilo del Navbar */
+        .navbar-custom {
+            background-color: #16633a; /* Verde institucional */
+            border-bottom: 3px solid #114d2d;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+	<nav
+		class="navbar navbar-expand-lg navbar-dark navbar-custom shadow-sm">
+		<div class="container-fluid">
+
+			<a class="navbar-brand fw-bold d-flex align-items-center"
+				th:href="@{/}"> <img th:src="@{/img/logo.jpg}" alt="Logo"
+				width="40" height="40" class="me-2 rounded shadow-sm">
+				SITRAEAL
+			</a>
+
+			<button class="navbar-toggler" type="button"
+				data-bs-toggle="collapse" data-bs-target="#navbarContent">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+
+			<div class="collapse navbar-collapse" id="navbarContent">
+				<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+					<li class="nav-item"><a class="nav-link active" th:href="@{/}"><i
+							class="bi bi-house-door"></i> Inicio</a></li>
+					<li class="nav-item"><a class="nav-link"
+						th:href="@{/equipo/nuevo}"><i class="bi bi-plus-square"></i>
+							Registrar Equipo</a></li>
+					<li class="nav-item"><a class="nav-link" th:href="@{/equipo}"><i
+							class="bi bi-search"></i> Trazabilidad</a></li>
+					<li class="nav-item"><a class="nav-link"
+						th:href="@{/equipo/controlEstados}"><i
+							class="bi bi-clipboard-check"></i> Inspecciones</a></li>
+				</ul>
+
+				<div class="d-flex align-items-center">
+
+					<div class="dropdown me-3">
+						<a href="#"
+							class="text-white position-relative text-decoration-none"
+							id="notifDrop" data-bs-toggle="dropdown" aria-expanded="false">
+							<i class="bi bi-bell-fill fs-4"
+							th:classappend="${totalAlertas > 0} ? (${hayVencidos} ? 'animar-peligro' : 'animar-alerta') : ''">
+						</i> <span th:if="${totalAlertas > 0}"
+							class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+							th:text="${totalAlertas}"> 0 </span>
+						</a>
+
+						<ul class="dropdown-menu dropdown-menu-end shadow-lg border-0"
+							aria-labelledby="notifDrop"
+							style="width: 320px; max-height: 400px; overflow-y: auto;">
+							<li class="p-3 border-bottom bg-light">
+								<h6 class="mb-0 fw-bold text-dark">
+									<i class="bi bi-shield-exclamation text-danger me-2"></i>Alertas
+									de Seguridad
+								</h6>
+							</li>
+
+							<li th:each="alerta : ${equiposAlerta}" class="border-bottom">
+								<a class="dropdown-item p-3 d-flex align-items-center"
+								th:href="@{/equipo/controlEstados(criterio=${alerta.serial})}">
+									<div class="me-3">
+										<i
+											th:class="${alerta.fechaVencimiento.isBefore(#temporals.createToday())} ? 'bi bi-x-octagon-fill text-danger fs-4' : 'bi bi-exclamation-triangle-fill text-warning fs-4'"></i>
+									</div>
+									<div class="flex-grow-1">
+										<div class="fw-bold text-dark small"
+											th:text="'S/N: ' + ${alerta.serial}">Serial</div>
+										<div class="text-muted small" th:text="${alerta.tipo?.nombre}">Tipo
+											de Equipo</div>
+										<span class="badge mt-1"
+											th:classappend="${alerta.fechaVencimiento.isBefore(#temporals.createToday())} ? 'bg-danger' : 'bg-warning text-dark'"
+											th:text="'Vence: ' + ${#temporals.format(alerta.fechaVencimiento, 'dd/MM/yyyy')}">
+										</span>
+									</div>
+							</a>
+							</li>
+
+							<li th:if="${totalAlertas == 0}" class="p-4 text-center"><i
+								class="bi bi-check-circle-fill text-success fs-1"></i>
+								<p class="mt-2 mb-0 text-muted small">Equipos certificados y
+									operativos.</p></li>
+
+							<li class="text-center p-2 bg-light"><a th:href="@{/equipo}"
+								class="text-decoration-none small fw-bold">Ver Inventario
+									General</a></li>
+						</ul>
+					</div>
+
+
+
+
+					<div class="dropdown">
+						<a
+							class="text-white fw-semibold dropdown-toggle text-decoration-none d-flex align-items-center"
+							href="#" role="button" data-bs-toggle="dropdown"
+							aria-expanded="false"> <i
+							class="bi bi-person-circle fs-4 me-2"></i> <span
+							th:text="${usuarioLogueado != null 
+                        ? (usuarioLogueado.nombre + ' ' + usuarioLogueado.apellidos) 
+                        : 'Administrador'}">
+						</span>
+						</a>
+
+						<ul class="dropdown-menu dropdown-menu-end shadow border-0">
+							<li class="px-3 py-2 small text-muted border-bottom"
+								th:if="${usuarioLogueado != null}"><i
+								class="bi bi-envelope-at me-1"></i> <span
+								th:text="${usuarioLogueado.correo}">correo@ejemplo.com</span></li>
+
+							<li><a class="dropdown-item py-2" th:href="@{/perfil}">
+									<i class="bi bi-gear me-2"></i> Mi Perfil
+							</a></li>
+
+							<li><hr class="dropdown-divider"></li>
+
+							<li>
+								<form th:action="@{/logout}" method="post" class="m-0 p-0">
+									<button type="submit" class="dropdown-item text-danger py-2">
+										<i class="bi bi-box-arrow-right me-2"></i> Cerrar Sesión
+									</button>
+								</form>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</nav>
+
+	<div class="toast-container">
+		<div id="alertToast" class="toast hide shadow-lg border-danger"
+			role="alert" aria-live="assertive" aria-atomic="true">
+			<div class="toast-header bg-danger text-white">
+				<i class="bi bi-exclamation-triangle-fill me-2"></i> <strong
+					class="me-auto">SITRAEAL: Notificación Crítica</strong>
+				<button type="button" class="btn-close btn-close-white"
+					data-bs-dismiss="toast"></button>
+			</div>
+			<div class="toast-body">
+				Se detectaron <strong><span th:text="${totalAlertas}">0</span></strong>
+				equipos fuera de norma o próximos a vencer. <br>
+				<small class="text-muted">Por favor, proceda con la
+					recertificación técnica.</small>
+			</div>
+		</div>
+	</div>
+
+	<main class="container mt-5">
+
+		<div class="text-center mb-5">
+			<h1 class="fw-bold text-success">Bienvenido a SITRAEAL</h1>
+			<p class="lead text-secondary">Sistema de Trazabilidad e
+				Inspección de Sistemas de Protección contra Caídas</p>
+			<hr class="w-25 mx-auto border-success border-2">
+		</div>
+
+		<div class="row g-4">
+
+			<div class="col-12 col-md-6 col-lg-3">
+				<div
+					class="card h-100 shadow-sm border-0 border-top border-success border-4">
+					<div class="card-body text-center d-flex flex-column">
+						<i class="bi bi-box-seam fs-1 text-success mb-3"></i>
+						<h5 class="fw-bold">Gestión de Equipos</h5>
+						<p class="text-muted small">Registros nuevos y control de
+							stock de activos.</p>
+						<div class="mt-auto">
+							<a th:href="@{/equipo/nuevo}"
+								class="btn btn-success btn-sm w-100 mb-2">Registrar</a> <a
+								th:href="@{/equipo}"
+								class="btn btn-outline-success btn-sm w-100">Ver Lista</a>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-12 col-md-6 col-lg-3">
+				<div
+					class="card h-100 shadow-sm border-0 border-top border-danger border-4">
+					<div class="card-body text-center d-flex flex-column">
+						<i class="bi bi-people fs-1 text-danger mb-3"></i>
+						<h5 class="fw-bold">Recursos Humanos</h5>
+						<p class="text-muted small">Control de trabajadores
+							autorizados para alturas.</p>
+						<div class="mt-auto">
+							<a th:href="@{/empleado/nuevo}"
+								class="btn btn-danger btn-sm w-100 mb-2">Nuevo Empleado</a> <a
+								th:href="@{/empleado}"
+								class="btn btn-outline-secondary btn-sm w-100">Consultar</a>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-12 col-md-6 col-lg-3">
+				<div
+					class="card h-100 shadow-sm border-0 border-top border-warning border-4">
+					<div class="card-body text-center d-flex flex-column">
+						<i class="bi bi-person-check fs-1 text-warning mb-3"></i>
+						<h5 class="fw-bold">Asignaciones</h5>
+						<p class="text-muted small">Vincular equipos a personal
+							operativo en campo.</p>
+						<div class="mt-auto">
+							<a th:href="@{/asignacion/nuevo}"
+								class="btn btn-warning text-white btn-sm w-100 mb-2 fw-bold">Nueva
+								Asignación</a> <a th:href="@{/asignacion}"
+								class="btn btn-outline-warning btn-sm w-100">Ver Entregas</a>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-12 col-md-6 col-lg-3">
+				<div
+					class="card h-100 shadow-sm border-0 border-top border-primary border-4 bg-white">
+					<div class="card-body text-center d-flex flex-column">
+						<i class="bi bi-clipboard-check fs-1 text-primary mb-3"></i>
+						<h5 class="fw-bold">Control de Estados</h5>
+						<p class="text-muted small">Recertificación, bajas y cambios
+							de estado operativo.</p>
+						<div class="mt-auto">
+							<a th:href="@{/equipo/controlEstados}"
+								class="btn btn-primary btn-sm w-100">Gestionar Estados</a>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-12 col-md-6 col-lg-3">
+				<div
+					class="card h-100 shadow-sm border-0 border-top border-info border-4">
+					<div class="card-body text-center d-flex flex-column">
+						<i class="bi bi-clock-history fs-1 text-info mb-3"></i>
+						<h5 class="fw-bold">Trazabilidad</h5>
+						<p class="text-muted small">Historial completo de movimientos
+							por activo.</p>
+						<div class="mt-auto">
+							<a th:href="@{/equipo/trazabilidad}"
+								class="btn btn-info text-white btn-sm w-100">Ver Historial</a>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-12 col-md-6 col-lg-3">
+				<div
+					class="card h-100 shadow-sm border-0 border-top border-dark border-4">
+					<div class="card-body text-center d-flex flex-column">
+						<i class="bi bi-exclamation-octagon fs-1 text-dark mb-3"></i>
+						<h5 class="fw-bold">Reportes SST</h5>
+						<p class="text-muted small">Registro de incidentes, accidentes de trabajo
+							estructurales.</p>
+						<div class="mt-auto">
+							<a th:href="@{/reporteIncidente/nuevo}"
+								class="btn btn-dark btn-sm w-100 mb-2 text-white">Reportar</a> <a
+								th:href="@{/reporteIncidente}"
+								class="btn btn-outline-dark btn-sm w-100">Listado</a>
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+	</main>
+
+	<footer class="text-center mt-5 py-3 text-muted border-top bg-white">
+		<small>&copy; 2025 SITRAEAL - Proyecto de Grado UTS | Justino
+			Cuadros Useda</small>
+	</footer>
+
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+	<script th:inline="javascript">
+        // Captura de datos desde el Controlador de Spring Boot
+       const totalAlertas = /*[[${totalAlertas}]]*/ 0;
+
+        // Función que dispara la notificación flotante (Toast)
+        function mostrarRecordatorio() {
+            if (totalAlertas > 0) {
+                const toastEl = document.getElementById('alertToast');
+                const toast = new bootstrap.Toast(toastEl, { delay: 10000 }); // Se muestra por 10 segundos
+                toast.show();
+                console.log("Notificación SITRAEAL enviada: " + new Date().toLocaleTimeString());
+            }
+        }
+
+        // Lógica de Tiempos
+        if (totalAlertas > 0) {
+            // 1. Mostrar la primera vez a los 4 segundos de cargar la página
+            setTimeout(mostrarRecordatorio, 4000);
+
+            // 2. Repetir cada 15 minutos (900.000 milisegundos)
+            setInterval(mostrarRecordatorio, 900000);
+        }
+    </script>
+</body>
+
+</html>

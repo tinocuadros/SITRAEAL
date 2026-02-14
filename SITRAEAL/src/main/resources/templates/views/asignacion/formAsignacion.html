@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Asignación de Equipos | SITRAEAL</title>
+
+<!-- Bootstrap -->
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+
+<!-- Bootstrap Icons -->
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+	rel="stylesheet">
+
+<style>
+body {
+	background: linear-gradient(rgba(0, 0, 0, .5), rgba(0, 0, 0, .5)),
+		url('/img/fondo-home.jpg') no-repeat center center fixed;
+	background-size: cover;
+}
+
+.card {
+	border-radius: 15px;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, .4);
+}
+
+.card-header {
+	background-color: #16633a;
+	color: white;
+	border-radius: 15px 15px 0 0;
+}
+
+.form-control:focus {
+	background-color: white;
+	box-shadow: none;
+}
+</style>
+</head>
+
+<body>
+
+	<div class="container mt-5">
+		<div class="row justify-content-center">
+			<div class="col-lg-8">
+
+				<!-- ALERTA ÉXITO -->
+				<div th:if="${msgSuccess}"
+					class="alert alert-success alert-dismissible fade show text-center">
+					<i class="bi bi-check-circle-fill"></i><br> <span
+						class="fs-4 fw-bold text-primary" th:text="${msgSuccess}"></span>
+					<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+				</div>
+
+				<!-- ALERTA ERROR -->
+				<div th:if="${msgError}"
+					class="alert alert-danger alert-dismissible fade show text-center">
+					<i class="bi bi-exclamation-triangle-fill"></i> <span
+						th:text="${msgError}"></span>
+					<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+				</div>
+
+				<!-- CARD -->
+				<div class="login-box">
+
+					<!-- Logo -->
+					<div class="text-center mb-3">
+						<img th:src="@{/img/logo.jpg}" width="70" alt="Logo" class="mb-2" />
+						<h4 class="login-title mb-0">SITRAEAL</h4>
+						<small class="text-muted"> Sistema de Trazabilidad para
+							Equipos de Alturas </small>
+					</div>
+
+					<div class="card">
+						<div class="card-header text-center">
+							<h4>
+								<i class="bi bi-person-check-fill"></i> Asignación de Equipo a
+								Trabajador
+							</h4>
+						</div>
+
+						<div class="card-body">
+							<form th:action="@{/asignacion/guardar}"
+								th:object="${asignacion}" method="post">
+
+								<h6 class="fw-bold text-primary mb-3">
+									<i class="bi bi-box-seam"></i> Equipo Disponible
+								</h6>
+
+								<div class="mb-3">
+									<label class="form-label">Equipo</label> <select
+										name="equipo.idEquipo" class="form-select" required="required">
+										<option value="">Seleccione equipo</option>
+										<option th:each="e : ${Equipo}" th:value="${e.idEquipo}"
+											th:text="'ID #' + ${e.idEquipo} + ' - ' + ${e.serial}">
+										</option>
+									</select>
+								</div>
+
+								<h6 class="fw-bold text-primary mb-3 mt-4">
+									<i class="bi bi-person-fill"></i> Trabajador
+								</h6>
+
+								<div class="mb-4">
+									<label class="form-label">Empleado</label> <select
+										name="empleado.idEmpleado" class="form-select"
+										required="required">
+										<option value="">Seleccione trabajador</option>
+										<option th:each="emp : ${Empleado}"
+											th:value="${emp.idEmpleado}"
+											th:text="${emp.nombres} + ' ' + ${emp.apellidos}"></option>
+									</select>
+								</div>
+
+								<div class="row mt-4 g-2">
+									<div class="col-md-6">
+										<button type="submit"
+											class="btn btn-success w-100 py-2 shadow-sm">
+											<i class="bi bi-check-circle-fill me-2"></i>Asignar Equipo
+										</button>
+									</div>
+
+									
+
+									<div class="col-12 mt-3">
+										<hr class="text-muted">
+										<div class="d-flex justify-content-center">
+											<a href="javascript:history.back()"
+												class="btn btn-link text-decoration-none text-secondary">
+												<i class="bi bi-arrow-left-circle me-1"></i> Volver a la
+												página anterior
+											</a>
+										</div>
+									</div>
+								</div>
+
+							</form>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

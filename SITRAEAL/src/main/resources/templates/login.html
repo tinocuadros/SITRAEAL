@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<title>Login - SITRAEAL</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Bootstrap -->
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+<style>
+body {
+	min-height: 100vh;
+	background: url('/img/login-bg.jpg') no-repeat center center/cover;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* Capa oscura sobre la imagen */
+.overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.55);
+}
+
+.login-box {
+	position: relative;
+	z-index: 2;
+	background: #ffffff;
+	border-radius: 12px;
+	width: 380px;
+	padding: 30px;
+	box-shadow: 0 10px 35px rgba(0, 0, 0, 0.4);
+}
+
+.login-title {
+	color: #16633a;
+	font-weight: bold;
+}
+
+.form-control:focus {
+	border-color: #16633a;
+	box-shadow: 0 0 0 0.15rem rgba(22, 99, 58, 0.25);
+}
+
+.btn-success {
+	background-color: #16633a;
+	border: none;
+}
+
+.btn-success:hover {
+	background-color: #134f2e;
+}
+
+.links a {
+	color: #16633a;
+	font-size: 0.9rem;
+	text-decoration: none;
+}
+
+.links a:hover {
+	text-decoration: underline;
+}
+</style>
+</head>
+
+<body>
+
+	<div class="overlay"></div>
+
+	<div class="login-box">
+
+		<!-- Logo -->
+		<div class="text-center mb-3">
+			<img src="/img/logo.jpg" width="70" alt="Logo" class="mb-2">
+			<h4 class="login-title mb-0">SITRAEAL</h4>
+			<small class="text-muted">Sistema de Trazabilidad para
+				Equipos de Alturas</small>
+		</div>
+
+		<hr>
+
+		<!-- Formulario -->
+		<form th:action="@{/login}" method="post">
+
+			<div class="mb-3">
+				<label class="form-label fw-semibold">Correo</label> <input
+					type="text" name="username" class="form-control"
+					placeholder="usuario@correo.com" required>
+			</div>
+
+			<div class="mb-3">
+				<label class="form-label fw-semibold">Contraseña</label> <input
+					type="password" name="password" class="form-control"
+					placeholder="••••••••" required>
+			</div>
+
+			<button class="btn btn-success w-100 py-2 fw-semibold">
+				Ingresar</button>
+
+			<!-- Mensajes -->
+			<div th:if="${param.error}"
+				class="alert alert-danger mt-3 text-center">Usuario o
+				contraseña incorrectos</div>
+
+			<div th:if="${param.logout}"
+				class="alert alert-success mt-3 text-center">Sesión cerrada
+				correctamente</div>
+
+			<!-- Links -->
+			<div class="links text-center mt-3">
+				<a th:href="@{/usuario/nuevo}"> Registrar nuevo usuario </a> <br>
+				<a href="/recuperar-password">¿Olvidaste tu contraseña?</a>
+			</div>
+
+		</form>
+
+	</div>
+
+</body>
+</html>
+
+

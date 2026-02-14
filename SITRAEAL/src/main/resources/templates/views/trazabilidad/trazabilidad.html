@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>SITRAEAL - Trazabilidad Unificada</title>
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+<style>
+.timeline-header {
+	border-left: 5px solid #198754;
+	padding-left: 15px;
+}
+
+.card-trazabilidad {
+	border: none;
+	border-radius: 12px;
+}
+
+.table thead {
+	background-color: #f8f9fa;
+}
+
+.badge-status {
+	font-weight: 500;
+	padding: 0.5em 1em;
+}
+</style>
+</head>
+<body class="bg-light">
+
+	<div class="container py-5">
+		<div class="card shadow-sm mb-4 card-trazabilidad">
+			<div class="card-body">
+				<form th:action="@{/equipo/trazabilidad}" method="get"
+					class="row g-3 align-items-end">
+					<div class="col-md-4">
+						<label class="form-label small fw-bold">Serial o ID del
+							Equipo</label>
+						<div class="input-group">
+							<span class="input-group-text bg-white"><i
+								class="bi bi-search"></i></span> <input type="text" name="criterio"
+								class="form-control" placeholder="Ingrese Serial..."
+								th:value="${param.criterio}">
+						</div>
+					</div>
+					<div class="col-md-3">
+						<label class="form-label small fw-bold">Fecha Inicio</label> <input
+							type="date" name="fechaInicio" class="form-control"
+							th:value="${param.fechaInicio}">
+					</div>
+					<div class="col-md-3">
+						<label class="form-label small fw-bold">Fecha Fin</label> <input
+							type="date" name="fechaFin" class="form-control"
+							th:value="${param.fechaFin}">
+					</div>
+					<div class="col-md-5 d-flex gap-2">
+						<button type="submit" class="btn btn-primary flex-grow-1">
+							<i class="bi bi-filter me-1"></i>Consultar
+						</button>
+
+						<a th:href="@{/equipo/trazabilidad}"
+							class="btn btn-outline-secondary" title="Limpiar Búsqueda"> <i
+							class="bi bi-arrow-clockwise"></i>
+						</a> <a th:href="@{/}" class="btn btn-dark px-4"> <i
+							class="bi bi-house-door me-2"></i>Inicio
+						</a>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<div th:if="${equipo != null}">
+			<div
+				class="card shadow-sm mb-4 card-trazabilidad border-start border-4 border-dark">
+				<div class="card-header bg-white py-3">
+					<div class="d-flex justify-content-between align-items-center">
+						<h5 class="mb-0 text-dark fw-bold">
+							<i class="bi bi-cpu me-2"></i>Información Técnica
+						</h5>
+						<span class="badge bg-success badge-status"
+							th:text="${equipo.estado?.nombre ?: 'N/A'}">Estado</span>
+					</div>
+				</div>
+				<div class="card-body">
+					<div class="row">
+						<div class="col-md-3 border-end">
+							<p class="text-muted small mb-1">Serial</p>
+							<h6 class="fw-bold" th:text="${equipo.serial}">-</h6>
+						</div>
+						<div class="col-md-3 border-end">
+							<p class="text-muted small mb-1">Marca / Tipo</p>
+							<h6
+								th:text="${(equipo.marca?.nombre ?: '-') + ' / ' + (equipo.tipo?.nombre ?: '-')}"></h6>
+						</div>
+						<div class="col-md-3 border-end">
+							<p class="text-muted small mb-1">Fecha Ingreso</p>
+							<h6
+								th:text="${equipo.fechaIngreso != null ? #temporals.format(equipo.fechaIngreso, 'dd/MM/yyyy') : '-'}"></h6>
+						</div>
+						<div class="col-md-3">
+							<p class="text-muted small mb-1">Proveedor</p>
+							<h6 th:text="${equipo.proveedor?.nombre ?: '-'}"></h6>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="card shadow-sm mb-4 card-trazabilidad">
+				<div class="card-body">
+					<h5 class="timeline-header mb-4 text-success fw-bold">Historial
+						de Vida Útil y Certificaciones</h5>
+					<div class="table-responsive">
+						<table class="table table-hover align-middle">
+							<thead>
+								<tr>
+									<th>Fecha</th>
+									<th>Estado Anterior</th>
+									<th>Estado Nuevo</th>
+									<th>Próximo Venc.</th>
+									<th>Observaciones</th>
+									<th class="text-center">Certificado</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="h : ${historialEstados}">
+									<td
+										th:text="${h.fechaMovimiento != null ? #temporals.format(h.fechaMovimiento, 'dd/MM/yyyy HH:mm') : '-'}"></td>
+									<td><span class="badge bg-secondary fw-normal"
+										th:text="${h.estadoAnterior ?: 'N/A'}"></span></td>
+									<td><span class="badge bg-primary badge-status"
+										th:text="${h.estadoNuevo ?: 'N/A'}"></span></td>
+									<td class="fw-bold text-danger"
+										th:text="${h.fechaVencimientoNueva != null ? #temporals.format(h.fechaVencimientoNueva, 'dd/MM/yyyy') : '-'}"></td>
+									<td class="small text-muted" th:text="${h.observaciones}"></td>
+									<td class="text-center"><a
+										th:if="${h.certificacion != null && h.certificacion != ''}"
+										th:href="@{'/uploads/' + ${h.certificacion}}" target="_blank"
+										class="text-danger"> <i class="bi bi-file-pdf-fill fs-4"></i>
+									</a> <span
+										th:unless="${h.certificacion != null && h.certificacion != ''}"
+										class="text-muted small">N/A</span></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+
+			<div class="card shadow-sm card-trazabilidad">
+				<div class="card-body">
+					<h5 class="timeline-header mb-4 text-primary fw-bold">Historial
+						de Custodia (Personal Responsable)</h5>
+					<div class="table-responsive">
+						<table class="table table-hover align-middle">
+							<thead>
+								<tr>
+									<th>Empleado Responsable</th>
+									<th>Fecha Entrega</th>
+									<th>Fecha Devolución</th>
+									<th>Estado Asignación</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="asig : ${historialAsignaciones}">
+									<td>
+										<div class="d-flex align-items-center">
+											<i class="bi bi-person-circle fs-4 me-2 text-primary"></i>
+											<div>
+												<span class="fw-bold d-block"
+													th:text="${asig.empleado != null ? (asig.empleado.nombres + ' ' + asig.empleado.apellidos) : 'No asignado'}"></span>
+												<small class="text-muted"
+													th:text="${asig.empleado != null ? 'Doc: ' + asig.empleado.idEmpleado : ''}"></small>
+											</div>
+										</div>
+									</td>
+									<td
+										th:text="${asig.fechaEntrega != null ? #temporals.format(asig.fechaEntrega, 'dd/MM/yyyy') : '-'}"></td>
+									<td
+										th:text="${asig.fechaDevolucion != null ? #temporals.format(asig.fechaDevolucion, 'dd/MM/yyyy') : 'ACTIVO / EN USO'}"
+										th:classappend="${asig.fechaDevolucion == null ? 'text-primary fw-bold' : ''}"></td>
+									<td><span class="badge"
+										th:classappend="${asig.estadoAsignacion == 'Devuelto'} ? 'bg-success' : 'bg-warning text-dark'"
+										th:text="${asig.estadoAsignacion}"></span></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div th:if="${error}"
+			class="alert alert-warning mt-4 text-center shadow-sm">
+			<i class="bi bi-exclamation-triangle-fill me-2"></i> <span
+				th:text="${error}"></span>
+		</div>
+
+		<div th:if="${equipo == null && error == null}"
+			class="text-center mt-5 text-muted">
+			<i class="bi bi-search fs-1"></i>
+			<p class="mt-2">Use los filtros superiores para consultar la
+				trazabilidad del equipo.</p>
+		</div>
+	</div>
+
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

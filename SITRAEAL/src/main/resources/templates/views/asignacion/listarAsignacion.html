@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Equipos Asignados | SITRAEAL</title>
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+	rel="stylesheet">
+<style>
+body {
+	background-color: #f8f9fa;
+}
+
+.card {
+	border: none;
+	border-radius: 12px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.table thead {
+	background-color: #16633a;
+	color: white;
+}
+
+.badge-tipo {
+	font-size: 0.85rem;
+}
+
+.btn-devolver {
+	border-radius: 20px;
+	padding: 5px 15px;
+}
+</style>
+</head>
+<body>
+
+	<div class="container mt-5">
+		<div class="row">
+			<div class="col-12">
+
+				<div class="d-flex justify-content-between align-items-center mb-4">
+					<div>
+						<h2 class="fw-bold text-dark">
+							<i class="bi bi-clipboard-check-fill text-success me-2"></i>Control
+							de Asignaciones
+						</h2>
+						<p class="text-muted">Equipos actualmente en poder de los
+							trabajadores</p>
+					</div>
+					<a th:href="@{/asignacion/nuevo}" class="btn btn-primary shadow-sm">
+						<i class="bi bi-plus-circle me-1"></i> Nueva Asignación
+					</a>
+				</div>
+
+				<div
+					class="alert alert-info border-0 shadow-sm d-flex align-items-center"
+					role="alert">
+					<i class="bi bi-info-circle-fill fs-4 me-3"></i>
+					<div>
+						Mostrando únicamente los <strong>equipos pendientes por
+							devolver</strong>.
+					</div>
+				</div>
+
+				<div class="card">
+					<div class="card-body p-0">
+						<div class="table-responsive">
+							<table class="table table-hover align-middle mb-0">
+								<thead>
+									<tr>
+										<th class="ps-4">ID</th>
+										<th>Equipo (Serial)</th>
+										<th>Tipo de Equipo</th>
+										<th>Trabajador</th>
+										<th>Fecha Entrega</th>
+										<th class="text-center">Acción</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr th:each="asig : ${AsignacionEquipo}"
+										th:if="${asig.estadoAsignacion == 'ASIGNADO'}">
+										<td class="ps-4 fw-bold text-secondary"
+											th:text="${asig.idAsignacion}"></td>
+
+										<td>
+											<div class="fw-bold text-dark"
+												th:text="${asig.equipo?.serial}"></div> <small
+											class="text-muted"
+											th:text="'ID Eq: ' + ${asig.equipo?.idEquipo}"></small>
+										</td>
+
+										<td><span class="badge bg-light text-dark border">
+												<i class="bi bi-tag-fill me-1 text-primary"></i> <span
+												th:text="${asig.equipo?.tipo?.nombre ?: 'N/A'}"></span>
+										</span></td>
+
+										<td><i class="bi bi-person-fill me-1 text-secondary"></i>
+											<span
+											th:text="${asig.empleado?.nombres + ' ' + asig.empleado?.apellidos}"></span>
+										</td>
+
+										<td
+											th:text="${asig.fechaEntrega != null ? #temporals.format(asig.fechaEntrega, 'dd/MM/yyyy HH:mm') : '---'}"></td>
+
+										<td class="text-center"><a
+											th:href="@{/asignacion/editar/{id}(id=${asig.idAsignacion})}"
+											class="btn btn-sm btn-success shadow-sm"
+											style="border-radius: 20px;"> <i
+												class="bi bi-arrow-return-left me-1"></i> Devolver
+										</a></td>
+									</tr>
+
+									<tr th:if="${#lists.isEmpty(AsignacionEquipo)}">
+										<td colspan="6" class="text-center py-5 text-muted"><i
+											class="bi bi-check2-all fs-1 text-success"></i>
+											<p class="mt-2 fw-bold">No hay equipos pendientes por
+												devolución.</p></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+				<div class="mt-4 text-center">
+					<a href="/" class="btn btn-link text-decoration-none text-muted">
+						<i class="bi bi-house-door"></i> Volver al Menú Principal
+					</a>
+				</div>
+
+			</div>
+		</div>
+	</div>
+
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

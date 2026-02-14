@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Registrar Usuario | SITRAEAL</title>
+
+<!-- Bootstrap -->
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+
+<!-- Bootstrap Icons -->
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+	rel="stylesheet">
+
+<style>
+body {
+	background: linear-gradient(rgba(0, 0, 0, .5), rgba(0, 0, 0, .5)),
+		url('/img/fondo-home.jpg') no-repeat center center fixed;
+	background-size: cover;
+}
+
+.card {
+	border-radius: 15px;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, .4);
+}
+
+.card-header {
+	background-color: #0d6efd;
+	color: white;
+	border-radius: 15px 15px 0 0;
+}
+
+.form-control:focus {
+	border-color: #0d6efd;
+	box-shadow: none;
+}
+</style>
+</head>
+
+<body>
+
+	<div class="container mt-5">
+		<div class="row justify-content-center">
+			<div class="col-lg-8">
+
+				<!-- ALERTAS -->
+				<div th:if="${msgSuccess}"
+					class="alert alert-success alert-dismissible fade show">
+					<i class="bi bi-check-circle-fill"></i> <span
+						th:text="${msgSuccess}"></span>
+					<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+				</div>
+
+				<div th:if="${msgError}"
+					class="alert alert-danger alert-dismissible fade show">
+					<i class="bi bi-exclamation-triangle-fill"></i> <span
+						th:text="${msgError}"></span>
+					<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+				</div>
+
+				<!-- CARD -->
+				<div class="login-box">
+
+					<!-- Logo -->
+					<div class="text-center mb-3">
+						<img src="/img/logo.jpg" width="70" alt="Logo" class="mb-2">
+						<h4 class="login-title mb-0">SITRAEAL</h4>
+						<small class="text-muted">Sistema de Trazabilidad para
+							Equipos de Alturas</small>
+					</div>
+
+
+					<div class="card">
+						<div class="card-header text-center">
+							<h4>
+								<i class="bi bi-person-plus-fill"></i> Registrar Usuario
+							</h4>
+						</div>
+
+						<div class="card-body">
+							<form th:action="@{/usuario}" th:object="${usuario}"
+								method="post">
+
+								<div class="row mb-3">
+									<div class="col-md-6">
+										<label class="form-label">Documento de Identidad</label> <input
+											type="text" th:field="*{idUsuario}" class="form-control"
+											required>
+									</div>
+									<div class="col-md-6">
+										<label class="form-label">Teléfono</label> <input type="text"
+											th:field="*{telefono}" class="form-control" required>
+									</div>
+								</div>
+
+								<div class="row mb-3">
+									<div class="col-md-6">
+										<label class="form-label">Nombre</label> <input type="text"
+											th:field="*{nombre}" class="form-control" required>
+									</div>
+									<div class="col-md-6">
+										<label class="form-label">Apellidos</label> <input type="text"
+											th:field="*{apellidos}" class="form-control" required>
+									</div>
+								</div>
+
+								<div class="mb-3">
+									<label class="form-label">Correo electrónico</label> <input
+										type="email" th:field="*{correo}" class="form-control"
+										required>
+								</div>
+
+								<div class="mb-3">
+									<label class="form-label">Dirección</label> <input type="text"
+										th:field="*{direccion}" class="form-control" required>
+								</div>
+
+								<div class="row mb-3">
+									<div class="col-md-6">
+										<label class="form-label">Contraseña</label> <input
+											type="password" th:field="*{contrasena}" class="form-control"
+											required>
+									</div>
+									<div class="col-md-6">
+										<label class="form-label">Fecha de nacimiento</label> <input
+											type="date" th:field="*{fechaNacimiento}"
+											class="form-control">
+									</div>
+								</div>
+
+								<div class="row mb-4">
+									<div class="col-md-6">
+										<label class="form-label">Fecha de ingreso</label> <input
+											type="date" th:field="*{fechaIngreso}" class="form-control"
+											required>
+									</div>
+
+									<div class="col-md-6">
+										<label class="form-label">Rol</label> <select
+											th:field="*{rol.idRol}" class="form-select">
+											<option value="">Seleccione rol</option>
+											<option value="1">Usuario</option>
+
+										</select>
+									</div>
+								</div>
+
+								<div class="d-flex justify-content-between">
+									<a th:href="@{/usuario}" class="btn btn-secondary"> <i
+										class="bi bi-arrow-left"></i> Volver
+									</a>
+									<button type="submit" class="btn btn-primary">
+										<i class="bi bi-save"></i> Guardar Usuario
+									</button>
+								</div>
+
+							</form>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+		<script
+			src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Registro de Equipos de Alturas | SITRAEAL</title>
+
+<!-- Bootstrap -->
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+
+<!-- Bootstrap Icons -->
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+	rel="stylesheet">
+
+<style>
+body {
+	background: linear-gradient(rgba(0, 0, 0, .5), rgba(0, 0, 0, .5)),
+		url('/img/fondo-home.jpg') no-repeat center center fixed;
+	background-size: cover;
+}
+
+.card {
+	border-radius: 15px;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, .4);
+}
+
+.card-header {
+	background-color: #16633a;
+	color: white;
+	border-radius: 15px 15px 0 0;
+}
+
+.form-control:focus {
+	background-color: white;
+	box-shadow: none;
+}
+</style>
+</head>
+
+<body>
+
+	<div class="container mt-5">
+		<div class="row justify-content-center">
+			<div class="col-lg-8">
+
+				<!-- ALERTA ÉXITO -->
+				<div th:if="${msgSuccess}"
+					class="alert alert-success alert-dismissible fade show">
+
+					<i class="bi bi-check-circle-fill"></i> <br>
+
+					<!-- ID GRANDE -->
+					<span class="fs-3 fw-bold text-primary" th:text="${msgSuccess}"></span>
+
+					<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+				</div>
+
+				<!-- ALERTA ERROR -->
+				<div th:if="${msgError}"
+					class="alert alert-danger alert-dismissible fade show">
+
+					<i class="bi bi-exclamation-triangle-fill"></i> <span
+						th:text="${msgError}"></span>
+
+					<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+				</div>
+
+
+				<!-- CARD -->
+				<div class="login-box">
+
+					<!-- Logo -->
+					<div class="text-center mb-3">
+						<img src="/img/logo.jpg" width="70" alt="Logo" class="mb-2">
+						<h4 class="login-title mb-0">SITRAEAL</h4>
+						<small class="text-muted">Sistema de Trazabilidad para
+							Equipos de Alturas</small>
+					</div>
+
+
+					<div class="card">
+						<div class="card-header text-center">
+							<h4>
+								<i class="bi bi-person-plus-fill"></i> Registro de Nuevos
+								Equipos
+							</h4>
+						</div>
+
+						<div class="card-body">
+							<form th:action="@{/equipo/guardar}" th:object="${equipo}"
+								method="post">
+
+
+								<!-- DATOS DEL PROVEEDOR -->
+								<h6 class="fw-bold text-primary mb-3 mt-4">
+									<i class="bi bi-box-seam "></i> Datos del Proveedor
+								</h6>
+
+								<div class="row mb-3">
+									<!-- PROVEEDOR -->
+									<div class="col-md-6">
+										<label class="form-label">Proveedor</label> <select
+											th:field="*{proveedor}" class="form-select" required>
+											<option value="">Seleccione</option>
+											<option th:each="p : ${Proveedor}"
+												th:value="${p.idProveedor}" th:text="${p.nombre}"></option>
+										</select>
+									</div>
+
+									<!-- NÚMERO DE FACTURA -->
+									<div class="col-md-6">
+										<label class="form-label">Número de factura</label> <input
+											type="text" th:field="*{numeroFactura}" class="form-control"
+											required>
+									</div>
+								</div>
+
+
+
+								<!-- DATOS GENERALES -->
+								<h6 class="fw-bold text-primary mb-3">
+									<i class="bi bi-box-seam"></i> Datos del Equipo
+								</h6>
+
+
+
+								<div class="row mb-3">
+									<!-- CATEGORÍA -->
+									<div class="col-md-6">
+										<label class="form-label">Categoría</label> <select
+											th:field="*{categoria}" class="form-select" required>
+											<option value="">Seleccione</option>
+											<option th:each="c : ${CategoriaEquipo}"
+												th:value="${c.idCategoria}" th:text="${c.nombre}"></option>
+										</select>
+									</div>
+
+									<!-- TIPO DE EQUIPO -->
+									<div class="col-md-6">
+										<label class="form-label">Tipo de equipo</label> <select
+											th:field="*{tipo}" class="form-select" required>
+											<option value="">Seleccione</option>
+											<option th:each="t : ${TipoEquipo}" th:value="${t.idTipo}"
+												th:text="${t.nombre}"></option>
+										</select>
+									</div>
+								</div>
+
+								<div class="row mb-3">
+									<!-- MARCA -->
+									<div class="col-md-6">
+										<label class="form-label">Marca</label> <select
+											th:field="*{marca}" class="form-select" required>
+											<option value="">Seleccione</option>
+											<option th:each="m : ${MarcaEquipo}" th:value="${m.idMarca}"
+												th:text="${m.nombre}"></option>
+										</select>
+									</div>
+
+									<!-- NORMA -->
+									<div class="col-md-6">
+										<label class="form-label">Norma</label> <select
+											th:field="*{norma}" class="form-select" required>
+											<option value="">Seleccione</option>
+											<option th:each="n : ${Norma}" th:value="${n.idNorma}"
+												th:text="${n.nombre}"></option>
+										</select>
+									</div>
+								</div>
+
+								<div class="row mb-3">
+									<!-- ESTADO DEL EQUIPO -->
+									<div class="col-md-6">
+										<label class="form-label">Estado del equipo</label> <select
+											th:field="*{estado}" class="form-select" required>
+											<option value="">Seleccione</option>
+											<option th:each="e : ${EstadoEquipo}"
+												th:value="${e.idEstado}" th:text="${e.nombre}"></option>
+										</select>
+									</div>
+
+									<!-- LOTE -->
+									<div class="col-md-6">
+										<label class="form-label">Lote</label> <input type="text"
+											th:field="*{lote}" class="form-control" required>
+									</div>
+								</div>
+
+								<div class="row mb-3">
+									<!-- SERIAL -->
+									<div class="col-md-6">
+										<label class="form-label">Serial</label> <input type="text"
+											th:field="*{serial}" class="form-control" required>
+									</div>
+
+									<!-- FECHA DE FABRICACIÓN -->
+									<div class="col-md-4">
+										<label class="form-label">Fabricación</label> <input
+											type="date" th:field="*{fechaFabricacion}"
+											class="form-control" required>
+									</div>
+
+									<!-- FECHA DE CERTIFICACIÓN -->
+									<div class="col-md-4">
+										<label class="form-label">Certificación</label> <input
+											type="date" th:field="*{fechaCertificacion}"
+											class="form-control">
+									</div>
+
+									<!-- FECHA DE VENCIMIENTO -->
+									<div class="col-md-4">
+										<label class="form-label">Vencimiento</label> <input
+											type="date" th:field="*{fechaVencimiento}"
+											class="form-control" required>
+									</div>
+								</div>
+
+								<!-- OBSERVACIONES -->
+								<h6 class="fw-bold text-primary mb-3 mt-4">
+									<i class="bi bi-file-earmark-text"></i> Observaciones
+								</h6>
+
+								<div class="row mb-4">
+									<div class="col-md-12">
+										<label class="form-label">Observaciones</label>
+										<textarea th:field="*{observaciones}" class="form-control"
+											rows="4"></textarea>
+									</div>
+								</div>
+
+								<div class="row mt-4 g-3">
+									<div class="col-md-6">
+										<button type="submit"
+											class="btn btn-success w-100 py-2 shadow-sm fw-bold">
+											<i class="bi bi-save2-fill me-2"></i> Registrar Equipo
+										</button>
+									</div>
+
+									
+
+									<div class="col-12 mt-4">
+										<div class="d-flex justify-content-center">
+											<a th:href="@{/}"
+												class="btn btn-link text-decoration-none text-muted"> <i
+												class="bi bi-house-door me-1"></i> Volver al Menú Principal
+											</a>
+										</div>
+									</div>
+								</div>
+
+							</form>
+
+
+						</div>
+
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+		<script
+			src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+	</div>
+</body>
+</html>

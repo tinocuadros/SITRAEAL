@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Reportes | SITRAEAL</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f4f7f6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .header-section {
+            background-color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #dee2e6;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .table-container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            border: none;
+        }
+        .thead-dark {
+            background-color: #212529;
+            color: white;
+        }
+        .badge-alta { background-color: #dc3545; }
+        .badge-media { background-color: #ffc107; color: #212529; }
+        .badge-baja { background-color: #198754; }
+        .btn-inicio {
+            transition: all 0.3s ease;
+        }
+        .btn-inicio:hover {
+            transform: translateX(-5px);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-section">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-journal-text me-2"></i>Historial de Incidentes
+                    </h1>
+                    <p class="text-muted mb-0">Gestión de Seguridad y Salud en el Trabajo - SITRAEAL</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a th:href="@{/}" class="btn btn-outline-dark shadow-sm">
+                        <i class="bi bi-house-door me-1"></i> Inicio
+                    </a>
+                    <a th:href="@{/reporteIncidente/nuevo}" class="btn btn-dark shadow-sm">
+                        <i class="bi bi-plus-circle me-1"></i> Nuevo Reporte
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="table-container mb-4">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th class="ps-4 py-3">ID</th>
+                            <th>Fecha y Hora</th>
+                            <th>Tipo de Suceso</th>
+                            <th>Gravedad</th>
+                            <th>Equipo (Serial)</th>
+                            <th>Empleado Reportante</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="r : ${reportes}">
+                            <td class="ps-4 fw-bold" th:text="${r.idReporte}"></td>
+                            
+                            <td th:text="${#temporals.format(r.fechaSuceso, 'dd/MM/yyyy HH:mm')}"></td>
+                            
+                            <td>
+                                <span class="badge bg-secondary text-uppercase" th:text="${r.tipo}"></span>
+                            </td>
+                            
+                            <td>
+                                <span th:text="${r.gravedad}" 
+                                      th:classappend="${r.gravedad == 'ALTA' ? 'badge badge-alta' : 
+                                                       (r.gravedad == 'MEDIA' ? 'badge badge-media' : 'badge badge-baja')}">
+                                </span>
+                            </td>
+                            
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <span class="fw-bold" th:text="${r.equipo.serial}"></span>
+                                    <small class="text-muted" th:text="${'Lote: ' + r.equipo.lote}"></small>
+                                </div>
+                            </td>
+                            
+                            <td th:text="${r.empleado.nombres + ' ' + r.empleado.apellidos}"></td>
+                            
+                            <td class="text-center">
+                                <div class="btn-group">
+                                    <button class="btn btn-sm btn-outline-primary" title="Ver Detalles">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr th:if="${#lists.isEmpty(reportes)}">
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="bi bi-info-circle fs-1 d-block mb-2"></i>
+                                No se encontraron reportes registrados.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="mb-5">
+            <a th:href="@{/}" class="btn btn-link text-decoration-none text-dark btn-inicio p-0">
+                <i class="bi bi-arrow-left-circle-fill fs-5 me-2"></i>
+                <strong>Volver al Inicio</strong>
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

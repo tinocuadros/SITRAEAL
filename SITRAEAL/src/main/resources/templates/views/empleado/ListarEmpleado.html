@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>SITRAEAL - Listado de Empleados</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+</head>
+<body class="bg-light">
+
+    <div class="container mt-5">
+        <div class="card shadow">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">Gestión de Empleados</h3>
+                <a th:href="@{/empleado/nuevo}" class="btn btn-success">
+                    <i class="bi bi-person-plus-fill me-2"></i>Nuevo Empleado
+                </a>
+            </div>
+            <div class="card-body">
+                
+                <div th:if="${msgSuccess}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <span th:text="${msgSuccess}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Documento</th>
+                                <th>Nombre Completo</th>
+                                <th>Ciudad</th>
+                                <th>Contacto</th>
+                                <th>Fecha Ingreso</th>
+                             
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="emp : ${empleados}">
+                                <td th:text="${emp.idEmpleado}" class="fw-bold"></td>
+                                <td th:text="${emp.nombres + ' ' + emp.apellidos}"></td>
+                                <td th:text="${emp.ciudad?.nombre}"></td>
+                                <td>
+                                    <div class="small">
+                                        <i class="bi bi-envelope-at text-muted me-1"></i>
+                                        <span th:text="${emp.correo}"></span>
+                                    </div>
+                                    <div class="small">
+                                        <i class="bi bi-telephone text-muted me-1"></i>
+                                        <span th:text="${emp.telefono}"></span>
+                                    </div>
+                                </td>
+                                <td th:text="${#temporals.format(emp.fechaIngreso, 'dd/MM/yyyy')}"></td>
+                                <td class="text-center">
+                                   
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(empleados)}">
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    No hay empleados registrados en el sistema.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer text-end">
+                <a th:href="@{/}" class="btn btn-secondary">
+                    <i class="bi bi-house-door me-2"></i>Volver al Inicio
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>>
