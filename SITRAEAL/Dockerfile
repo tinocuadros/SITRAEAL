@@ -1,14 +1,10 @@
-# Usamos una imagen de Java 17 (la versión que tienes en tu proyecto)
+# Etapa 1: Compilar la aplicación
+FROM maven:3.8.5-openjdk-17 AS build
+COPY . .
+RUN mvn clean package -DskipTests
+
+# Etapa 2: Ejecutar la aplicación
 FROM eclipse-temurin:17-jdk-alpine
-
-# Directorio de trabajo dentro del contenedor
-WORKDIR /app
-
-# Copiamos el archivo JAR generado por Maven al contenedor
-COPY target/*.jar app.jar
-
-# Exponemos el puerto que usa Render
+COPY --from=build /target/*.jar app.jar
 EXPOSE 10000
-
-# Comando para ejecutar la aplicación
 ENTRYPOINT ["java", "-jar", "app.jar", "--server.port=10000"]
