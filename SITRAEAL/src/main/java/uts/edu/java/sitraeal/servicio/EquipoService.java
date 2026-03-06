@@ -14,5 +14,6 @@ public interface EquipoService {
 Equipo buscarPorSerial(String serial);
     
 //En EquipoService.java
-void recertificarEquipo(Integer idEquipo, Integer idEstado, LocalDate nuevaVenc, LocalDate nuevaCert, String obs);
+
+void recertificarEquipo(Integer idEquipo, Integer idEstado, LocalDate nuevaVenc, LocalDate nuevaCert, String obs, String certificacion);
 }

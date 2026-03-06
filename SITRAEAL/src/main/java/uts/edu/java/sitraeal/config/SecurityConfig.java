@@ -10,48 +10,44 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class SecurityConfig {
 
-	@Bean
-	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    @Bean
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-	    http
-	        .csrf(csrf -> csrf.disable())
-	        .authorizeHttpRequests(auth -> auth
-	            .requestMatchers(
-	                "/login",
-	                "/usuario/nuevo",
-	                "/css/**",
-	                "/js/**",
-	                "/img/**"
-	            ).permitAll()
+        http
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                    "/login",
+                    "/usuario/nuevo",
+                    "/css/**",
+                    "/js/**",
+                    "/img/**",
+                    "/uploads/**" // Permite ver los certificados subidos
+                ).permitAll()
 
-	            // ✅ PERMITIR POST A /usuario
-	            .requestMatchers(org.springframework.http.HttpMethod.POST, "/usuario")
-	            .permitAll()
+                // Permitir acceso a empleados solo a usuarios autenticados
+                .requestMatchers("/empleado/**").authenticated() 
 
-	            // ✅ PERMITIR GET /usuario (listar)
-	            .requestMatchers(org.springframework.http.HttpMethod.GET, "/usuario")
-	            .permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/usuario").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/usuario").permitAll()
 
-	            .anyRequest().authenticated()
-	        )
-	        .formLogin(form -> form
-	            .loginPage("/login")
-	            .defaultSuccessUrl("/", true)
-	            .permitAll()
-	        )
-	        .logout(logout -> logout
-	            .logoutSuccessUrl("/login?logout")
-	            .permitAll()
-	        );
+                .anyRequest().authenticated()
+            )
+            .formLogin(form -> form
+                .loginPage("/login")
+                .defaultSuccessUrl("/", true) 
+                .permitAll()
+            ) 
+            .logout(logout -> logout
+                .logoutSuccessUrl("/login?logout")
+                .permitAll()
+            ); 
 
-	    return http.build();
-	}
-
+        return http.build();
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 }
-
-

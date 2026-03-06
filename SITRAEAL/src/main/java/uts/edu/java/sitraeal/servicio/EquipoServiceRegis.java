@@ -99,39 +99,40 @@ public class EquipoServiceRegis  implements EquipoService {
 	
 	@Transactional
 	@Override
-	public void recertificarEquipo(Integer idEquipo, Integer idEstado, LocalDate nuevaVenc, LocalDate nuevaCert, String obs) {
-	    // Buscamos el equipo
+	public void recertificarEquipo(Integer idEquipo, Integer idEstado, LocalDate nuevaVenc, LocalDate nuevaCert, String obs, String certificacion) {
+	    // 1. Buscamos el equipo
 	    Equipo equipo = equipoRepository.findById(idEquipo)
 	            .orElseThrow(() -> new RuntimeException("Equipo no encontrado"));
 
-	    //  Buscamos el objeto del nuevo estado usando el idEstado que viene del combo
+	    // 2. Buscamos el objeto del nuevo estado
 	    uts.edu.java.sitraeal.modelo.EstadoEquipo nuevoEstado = estadoRepo.findById(idEstado)
 	            .orElseThrow(() -> new RuntimeException("Estado no encontrado"));
 
-	 // REGISTRO DE HISTORIAL
+	    // 3. REGISTRO DE HISTORIAL
 	    HistorialEstados historial = new HistorialEstados();
 	    historial.setEquipo(equipo);
 	    historial.setEstadoAnterior(equipo.getEstado().getNombre());
 	    historial.setEstadoNuevo(nuevoEstado.getNombre());
 	    
-	    // Si la nueva fecha es nula, el historial registra la que ya tenía
 	    historial.setFechaVencimientoAnterior(equipo.getFechaVencimiento());
 	    historial.setFechaVencimientoNueva(nuevaVenc != null ? nuevaVenc : equipo.getFechaVencimiento());
 	    historial.setFechaMovimiento(LocalDateTime.now());
 	    historial.setObservaciones(obs);
+	    
+	    // ✅ NUEVO: Guardamos el nombre del archivo en el historial
+	    historial.setCertificacion(certificacion); 
+	    
 	    historialRepos.save(historial);
 
-	    // ACTUALIZACIÓN DEL EQUIPO
+	    // 4. ACTUALIZACIÓN DEL EQUIPO
 	    equipo.setEstado(nuevoEstado);
 	    
-	    // SOLO ACTUALIZA LA FECHA SI EL USUARIO ENVIÓ UNA NUEVA
 	    if (nuevaVenc != null) equipo.setFechaVencimiento(nuevaVenc);
 	    if (nuevaCert != null) equipo.setFechaCertificacion(nuevaCert);
 	    
 	    // 5. Guardar cambios en el equipo
 	    equipoRepository.saveAndFlush(equipo); 
 	}
-	
 	
 	
 

@@ -41,7 +41,7 @@ body {
 
 <body>
 
-	<div class="container mt-5">
+	<div class="container mt-5 bg-light">
 		<div class="row justify-content-center">
 			<div class="col-lg-8">
 
@@ -81,7 +81,7 @@ body {
 
 						<div class="card-body">
 							<form th:action="@{/empleado/guardar}" th:object="${empleado}"
-								method="post">
+								method="post" enctype="multipart/form-data">
 
 
 								<!-- IDENTIFICACIÓN -->
@@ -173,6 +173,21 @@ body {
 										<label class="form-label">Fecha de ingreso</label> <input
 											type="date" th:field="*{fechaIngreso}" class="form-control"
 											required>
+									</div>
+								</div>
+								
+								<h6 class="fw-bold text-primary mb-3 mt-4">
+									<i class="bi bi-file-earmark-check"></i> Certificación
+								</h6>
+
+								<div class="row mb-3">
+									<div class="col-md-12">
+										<label class="form-label">Certificado de curso de
+											alturas (PDF o Imagen)</label> <input type="file"
+											name="fileCertificado" class="form-control"
+											accept=".pdf, .jpg, .jpeg, .png" required> <small
+											class="text-muted">Adjunte el documento legal
+											vigente.</small>
 									</div>
 								</div>
 

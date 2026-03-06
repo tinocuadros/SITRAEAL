@@ -1,11 +1,18 @@
 package uts.edu.java.sitraeal.controller;
 
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +23,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uts.edu.java.sitraeal.modelo.Equipo;
 import uts.edu.java.sitraeal.modelo.Usuario;
@@ -95,94 +104,99 @@ public class EquipoController {
 	}
 
 	
-	//Guardar
 	@PostMapping("/guardar")
 	public String guardarEquipo(
 	        @ModelAttribute("equipo") Equipo equipo,
 	        RedirectAttributes redirectAttributes) {
 
 	    try {
-	        
+	        // 1. Normalización del Serial (Pasar a MAYÚSCULAS y quitar espacios)
 	        if (equipo.getSerial() != null) {
 	            equipo.setSerial(equipo.getSerial().toUpperCase().trim());
 	        }
 
+	        // 2. Datos automáticos
 	        equipo.setFechaIngreso(LocalDateTime.now());
-	        Equipo equipoGuardado = service.guardar(equipo);
 
-	        redirectAttributes.addFlashAttribute("msgSuccess", 
-	            "Equipo registrado correctamente con ID #: " + equipoGuardado.getIdEquipo() + "Con Serial #: " +equipoGuardado.getSerial());
-	        
+	        // 3. Guardado en la Base de Datos
+	        service.guardar(equipo);
+
+	        redirectAttributes.addFlashAttribute("msgSuccess", "Equipo registrado correctamente.");
 	        return "redirect:/equipo/nuevo";
 
 	    } catch (Exception e) {
-	        // 2. Detectar si el error es por el Serial Duplicado
-	        String mensajeError = "Error al guardar el equipo.";
-	        
-	        // Buscamos palabras clave en el error de la base de datos
-	        if (e.getMessage().contains("Duplicate entry") || e.getMessage().contains("constraint") || e.getMessage().contains("Unique")) {
-	            mensajeError = "El Serial '" + equipo.getSerial() + "' ya existe. Por favor, verifique e intente con otro.";
-	        } else {
-	            mensajeError += " Detalle: " + e.getMessage();
-	        }
-
-	        e.printStackTrace(); 
-	        redirectAttributes.addFlashAttribute("msgError", mensajeError);
+	        // Captura cualquier error de base de datos o validación
+	        redirectAttributes.addFlashAttribute("msgError", "Error al guardar el equipo: " + e.getMessage());
 	        return "redirect:/equipo/nuevo";
 	    }
 	}
-	
-	
 	//Cambiar estados 
 	@GetMapping("/controlEstados")
 	public String mostrarControlEstados(
-	        @org.springframework.web.bind.annotation.RequestParam(value = "criterio", required = false) String criterio, 
+	        @RequestParam(value = "criterio", required = false) String criterio, 
 	        Model model) {
 	    
-	  
 	    model.addAttribute("estados", estadoEquipoRepository.findAll());
 
 	    if (criterio != null && !criterio.isEmpty()) {
-	        Equipo equipo = null;
+	        // 1. Buscamos SIEMPRE primero por Serial (sea numérico o no)
+	        Equipo equipo = service.buscarPorSerial(criterio.trim().toUpperCase());
 	        
-	        try {
-	            // Intentamos buscar por ID
-	            Integer id = Integer.parseInt(criterio);
-	            equipo = service.obtEquipoId(id); 
-	        } catch (NumberFormatException e) {
-	            // Si no es número, buscamos por Serial
-	            equipo = service.buscarPorSerial(criterio); 
+	        // 2. Si no se encontró por serial, intentamos ver si el criterio es un ID numérico
+	        if (equipo == null) {
+	            try {
+	                Integer id = Integer.parseInt(criterio);
+	                equipo = service.obtEquipoId(id);
+	            } catch (NumberFormatException e) {
+	                // No es número y no se encontró por serial
+	            }
 	        }
 
 	        if (equipo != null) {
 	            model.addAttribute("equipo", equipo);
 	        } else {
-	            model.addAttribute("error", "No se encontró equipo con ID o Serial: " + criterio);
+	            model.addAttribute("error", "No se encontró equipo con Serial o ID: " + criterio);
 	        }
 	    }
-	    
 	    
 	    return "views/equipo/controlEstados"; 
 	}
 	
 	
-	//Actualizar Estados
+	//actualizar estados 
 	@PostMapping("/actualizar-estado-completo")
 	public String actualizarEstadoCompleto(
-	        @org.springframework.web.bind.annotation.RequestParam("idEquipo") Integer id,
-	        @org.springframework.web.bind.annotation.RequestParam("idEstado") Integer idEstado, // ID del combo
-	        @org.springframework.web.bind.annotation.RequestParam("fechaCertificacion") String fCert,
-	        @org.springframework.web.bind.annotation.RequestParam("fechaVencimiento") String fVenc,
-	        @org.springframework.web.bind.annotation.RequestParam("observaciones") String obs,
+	        @RequestParam("idEquipo") Integer id,
+	        @RequestParam("idEstado") Integer idEstado,
+	        @RequestParam("fechaCertificacion") String fCert,
+	        @RequestParam("fechaVencimiento") String fVenc,
+	        @RequestParam("observaciones") String obs,
+	        @RequestParam("fileCertificacion") org.springframework.web.multipart.MultipartFile archivo, 
 	        RedirectAttributes ra) {
 
-		try {
-	        
+	    try {
+	        String nombreArchivo = null;
+
+	        // 1. Lógica de carga de archivo
+	        if (!archivo.isEmpty()) {
+	            String rootPath = new File("target/uploads/recertificaciones").getAbsolutePath();
+	            File directory = new File(rootPath);
+	            if (!directory.exists()) directory.mkdirs();
+
+	            nombreArchivo = java.util.UUID.randomUUID().toString() + "_" + archivo.getOriginalFilename();
+	            java.nio.file.Path rutaCompleta = java.nio.file.Paths.get(rootPath + File.separator + nombreArchivo);
+	            
+	            java.nio.file.Files.copy(archivo.getInputStream(), rutaCompleta, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+	        }
+
 	        LocalDate cert = (fCert != null && !fCert.isEmpty()) ? LocalDate.parse(fCert) : null;
 	        LocalDate venc = (fVenc != null && !fVenc.isEmpty()) ? LocalDate.parse(fVenc) : null;
 
-	        service.recertificarEquipo(id, idEstado, venc, cert, obs);
-	        ra.addFlashAttribute("msgSuccess", "Estado actualizado correctamente.");
+	       
+	        // Se cambia 'fCert' por 'nombreArchivo' para que guarde el nombre del archivo en la BD
+	        service.recertificarEquipo(id, idEstado, venc, cert, obs, nombreArchivo);
+	        
+	        ra.addFlashAttribute("msgSuccess", "Estado actualizado y certificado guardado correctamente.");
 	    } catch (Exception e) {
 	        ra.addFlashAttribute("msgError", "Error: " + e.getMessage());
 	    }

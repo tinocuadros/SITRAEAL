@@ -66,7 +66,7 @@ public class Equipo {
 	@Column(name = "fecha_vencimiento", nullable = false)
 	private LocalDate fechaVencimiento;
 
-
+   
 	
 	@Column(name = "observaciones", length = 255)
 	private String observaciones;
@@ -175,7 +175,7 @@ public class Equipo {
 	}
 
 
-	public void setNumeroFactura(String  numeroFactura) {
+	public void setNumeroFactura(String numeroFactura) {
 		this.numeroFactura = numeroFactura;
 	}
 
@@ -241,6 +241,9 @@ public class Equipo {
 
 
 
+
+
+
 	public String getObservaciones() {
 		return observaciones;
 	}
@@ -251,11 +254,5 @@ public class Equipo {
 	}
 
 
-	
-
-	
-
-
-	
 	
 }

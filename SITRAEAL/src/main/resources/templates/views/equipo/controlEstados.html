@@ -3,106 +3,125 @@
 <head>
 <meta charset="UTF-8">
 <title>SITRAEAL - Gestión de Estados</title>
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-	rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+    .card { border-radius: 15px; overflow: hidden; }
+    .card-header { background: linear-gradient(45deg, #2c3e50, #007bff); }
+    #seccionRecertificacion { display: none; transition: all 0.3s ease; }
+    .bg-info-light { background-color: #e7f3ff; border-left: 5px solid #0dcaf0; }
+</style>
 </head>
 <body class="container mt-5 bg-light">
 
+    <div class="card shadow-lg border-0">
+        <div class="card-header text-white py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="mb-0"><i class="bi bi-gear-wide-connected me-2"></i>Control de Estados</h3>
+                <a th:href="@{/}" class="btn btn-outline-light btn-sm shadow-sm">
+                    <i class="bi bi-house-door-fill me-1"></i> Inicio
+                </a>
+            </div>
+        </div>
+        
+        <div class="card-body p-4">
+            <form th:action="@{/equipo/controlEstados}" method="get" class="row g-2 mb-4">
+                <div class="col-md-9">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+                        <input type="text" name="criterio" class="form-control border-start-0 ps-0"
+                            placeholder="Ingrese ID o Serial del Equipo para gestionar..." th:value="${param.criterio}">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100 fw-bold">Consultar</button>
+                </div>
+            </form>
 
+            <div th:if="${msgSuccess}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${msgSuccess}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            
+            <div th:if="${msgError}" class="alert alert-danger" th:text="${msgError}"></div>
+            <div th:if="${error}" class="alert alert-warning" th:text="${error}"></div>
 
-	<div class="card shadow">
-		<div class="card-header bg-primary text-white">
-			<h3 class="mb-0">Control de Estados y Recertificación</h3>
-		</div>
-		<div class="card-body">
-		
-		
+            <div th:if="${equipo != null}">
+                <div class="p-3 mb-4 rounded bg-info-light shadow-sm">
+                    <div class="row text-center">
+                        <div class="col-md-4"><strong>Serial:</strong> <span th:text="${equipo.serial}"></span></div>
+                        <div class="col-md-4"><strong>Lote:</strong> <span th:text="${equipo.lote}"></span></div>
+                        <div class="col-md-4">
+                            <strong>Estado Actual:</strong> 
+                            <span class="badge bg-primary" th:text="${equipo.estado?.nombre ?: 'N/A'}"></span>
+                        </div>
+                    </div>
+                </div>
 
-			<form th:action="@{/equipo/controlEstados}" method="get"
-				class="row g-3 mb-4">
-				<div class="col-md-8">
-					<input type="text" name="criterio" class="form-control"
-						placeholder="ID o Serial del Equipo..."
-						th:value="${param.criterio}">
-				</div>
-				<div class="col-md-4">
-					<button type="submit" class="btn btn-dark w-100">Consultar</button>
-				</div>
-			</form>
+                <form th:action="@{/equipo/actualizar-estado-completo}" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="idEquipo" th:value="${equipo.idEquipo}">
 
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold">Asignar Nuevo Estado</label>
+                            <select name="idEstado" class="form-select border-primary" required>
+                                <option value="" disabled selected>-- Seleccione un estado --</option>
+                                <option th:each="est : ${estados}" th:value="${est.idEstado}" th:text="${est.nombre}"></option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="button" class="btn btn-outline-info w-100" onclick="toggleRecertificacion()">
+                                <i class="bi bi-file-earmark-medical"></i> Recertificar
+                            </button>
+                        </div>
 
+                        <div id="seccionRecertificacion" class="col-12 border rounded p-3 mt-3 bg-white shadow-sm">
+                            <h6 class="fw-bold text-primary mb-3">
+                                <i class="bi bi-patch-check"></i> Datos de Recertificación y Soporte
+                            </h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Nueva Fecha de Certificación</label>
+                                    <input type="date" name="fechaCertificacion" class="form-control" th:value="${equipo.fechaCertificacion}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Nueva Fecha de Vencimiento</label>
+                                    <input type="date" name="fechaVencimiento" class="form-control" th:value="${equipo.fechaVencimiento}">
+                                </div>
+                                <div class="col-md-12 mt-3">
+                                    <label class="form-label fw-bold">Documento Soporte (PDF / Imagen)</label>
+                                    <input type="file" name="fileCertificacion" class="form-control" accept="application/pdf, image/*">
+                                </div>
+                            </div>
+                        </div>
 
+                        <div class="col-md-12 mt-3">
+                            <label class="form-label fw-bold">Observaciones del Movimiento</label>
+                            <textarea name="observaciones" class="form-control" rows="2" placeholder="Describa el motivo del cambio de estado..." required></textarea>
+                        </div>
 
-			<hr>
+                        <div class="col-12 mt-4">
+                            <button type="submit" class="btn btn-success btn-lg w-100 shadow">
+                                <i class="bi bi-cloud-arrow-up-fill me-2"></i> Procesar y Guardar Historial
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
-			<div th:if="${msgSuccess}" class="alert alert-success"
-				th:text="${msgSuccess}"></div>
-			<div th:if="${msgError}" class="alert alert-danger"
-				th:text="${msgError}"></div>
-			<div th:if="${error}" class="alert alert-warning" th:text="${error}"></div>
-
-			<div th:if="${equipo != null}">
-				<div class="alert alert-info">
-
-					<strong>Serial:</strong> <span th:text="${equipo.serial}"></span> |
-					<strong>Lote:</strong> <span th:text="${equipo.lote}"></span> | <strong>Estado
-						Actual:</strong> <span th:text="${equipo.estado?.nombre ?: 'N/A'}"></span>
-				</div>
-
-				<form th:action="@{/equipo/actualizar-estado-completo}"
-					method="post" class="row g-3">
-					<input type="hidden" name="idEquipo" th:value="${equipo.idEquipo}">
-
-					<div class="col-md-12">
-						<label class="form-label font-weight-bold">Asignar Nuevo
-							Estado</label> <select name="idEstado" class="form-select" required>
-							<option value="" disabled selected>-- Seleccione un
-								estado --</option>
-							<option th:each="est : ${estados}" th:value="${est.idEstado}"
-								th:text="${est.nombre}"></option>
-						</select>
-					</div>
-
-					<div class="col-md-6">
-						<label class="form-label">Nueva Fecha de Certificación</label> <input
-							type="date" name="fechaCertificacion" class="form-control"
-							th:value="${equipo.fechaCertificacion}" required>
-					</div>
-
-					<div class="col-md-6">
-						<label class="form-label">Nueva Fecha de Vencimiento</label> <input
-							type="date" name="fechaVencimiento" class="form-control"
-							th:value="${equipo.fechaVencimiento}" required>
-					</div>
-					
-					<div class="col-md-6">
-					
-						<input type="file" name="fileCertificacion" accept="application/pdf, image/*">
-					</div>
-					
-					
-
-					<div class="col-md-12">
-						<label class="form-label">Observaciones</label>
-						<textarea name="observaciones" class="form-control" rows="3"
-							required></textarea>
-					</div>
-
-					<div class="col-12 mt-3
-                    ">
-						<button type="submit" class="btn btn-success btn-lg w-100 shadow">
-							Actualizar y Guardar Historial</button>
-					</div>
-				</form>
-				<div class="mt-3 text-center">
-					<a href="/" class="btn btn-link text-decoration-none text-muted">
-						<i class="bi bi-house-door"></i> Volver al Menú Principal
-					</a>
-				</div>
-			</div>
-		</div>
-	</div>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleRecertificacion() {
+            const seccion = document.getElementById('seccionRecertificacion');
+            if (seccion.style.display === 'none' || seccion.style.display === '') {
+                seccion.style.display = 'block';
+            } else {
+                seccion.style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>

@@ -43,100 +43,132 @@ public class Empleado {
 
     @Column(name = "fecha_ingreso", nullable = false)
     private LocalDate fechaIngreso;
+    
+    @Column(name = "archivo_certificado", length = 500, nullable = true) 
+    private String archivoCertificado;
+ 
 
 	public Empleado() {
 		
 	}
 
-	public Empleado(Integer idEmpleado, String nombres, String apellidos, String telefono,
-			String correo, String direccion, Ciudad ciudad, LocalDate fechaNacimiento, LocalDate fechaIngreso) {
+
+	public Empleado(Integer idEmpleado, String nombres, String apellidos, String telefono, String correo,
+			String direccion, Ciudad ciudad, LocalDate fechaNacimiento, LocalDate fechaIngreso,
+			String archivoCertificado) {
 		super();
 		this.idEmpleado = idEmpleado;
 		this.nombres = nombres;
 		this.apellidos = apellidos;
-		
 		this.telefono = telefono;
 		this.correo = correo;
 		this.direccion = direccion;
 		this.ciudad = ciudad;
 		this.fechaNacimiento = fechaNacimiento;
 		this.fechaIngreso = fechaIngreso;
+		this.archivoCertificado = archivoCertificado;
 	}
+
 
 	public Integer getIdEmpleado() {
 		return idEmpleado;
 	}
 
+
 	public void setIdEmpleado(Integer idEmpleado) {
 		this.idEmpleado = idEmpleado;
 	}
+
 
 	public String getNombres() {
 		return nombres;
 	}
 
+
 	public void setNombres(String nombres) {
 		this.nombres = nombres;
 	}
+
 
 	public String getApellidos() {
 		return apellidos;
 	}
 
+
 	public void setApellidos(String apellidos) {
 		this.apellidos = apellidos;
 	}
 
-	
 
 	public String getTelefono() {
 		return telefono;
 	}
 
+
 	public void setTelefono(String telefono) {
 		this.telefono = telefono;
 	}
+
 
 	public String getCorreo() {
 		return correo;
 	}
 
+
 	public void setCorreo(String correo) {
 		this.correo = correo;
 	}
+
 
 	public String getDireccion() {
 		return direccion;
 	}
 
+
 	public void setDireccion(String direccion) {
 		this.direccion = direccion;
 	}
+
 
 	public Ciudad getCiudad() {
 		return ciudad;
 	}
 
+
 	public void setCiudad(Ciudad ciudad) {
 		this.ciudad = ciudad;
 	}
+
 
 	public LocalDate getFechaNacimiento() {
 		return fechaNacimiento;
 	}
 
+
 	public void setFechaNacimiento(LocalDate fechaNacimiento) {
 		this.fechaNacimiento = fechaNacimiento;
 	}
+
 
 	public LocalDate getFechaIngreso() {
 		return fechaIngreso;
 	}
 
+
 	public void setFechaIngreso(LocalDate fechaIngreso) {
 		this.fechaIngreso = fechaIngreso;
 	}
 
-    
+
+	public String getArchivoCertificado() {
+		return archivoCertificado;
+	}
+
+
+	public void setArchivoCertificado(String archivoCertificado) {
+		this.archivoCertificado = archivoCertificado;
+	}
+
+	
 
 }
