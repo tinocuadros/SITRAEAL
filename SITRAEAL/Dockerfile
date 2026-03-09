@@ -1,11 +1,13 @@
 # Etapa 1: Compilación
 FROM maven:3.8.5-openjdk-17 AS build
+WORKDIR /app
 COPY . .
 RUN mvn clean package -DskipTests
 
 # Etapa 2: Ejecución
 FROM eclipse-temurin:17-jdk-alpine
-# Usamos un comando más robusto para copiar el jar
-COPY --from=build /target/SITRAEAL-0.0.1-SNAPSHOT.jar app.jar
+WORKDIR /app
+# Cambiamos la ruta para que sea relativa al WORKDIR de la etapa anterior
+COPY --from=build /app/target/SITRAEAL-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 10000
 ENTRYPOINT ["java", "-jar", "app.jar", "--server.port=10000"]
