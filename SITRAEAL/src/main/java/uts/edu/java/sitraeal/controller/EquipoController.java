@@ -16,6 +16,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,10 +31,13 @@ import uts.edu.java.sitraeal.modelo.Equipo;
 import uts.edu.java.sitraeal.modelo.Usuario;
 import uts.edu.java.sitraeal.repositorio.*;
 import uts.edu.java.sitraeal.servicio.EquipoService;
+import uts.edu.java.sitraeal.servicio.EquipoServiceRegis;
 
 @Controller
 @RequestMapping("/equipo")
 public class EquipoController {
+
+    private final EquipoServiceRegis equipoServiceRegis;
 
 	private final CategoriaEquipoRepository categoriaEquipoRepository;
 
@@ -54,7 +58,7 @@ public class EquipoController {
 	EquipoController(EquipoRepository equipoRepository, TipoEquipoRepository tipoEquipoRepository,
 			MarcaEquipoRepository marcaEquipoRepository, NormaRepository normaRepository,
 			ProveedorRepository proveedorRepository, EstadoEquipoRepository estadoEquipoRepository,
-			CategoriaEquipoRepository categoriaEquipoRepository, EquipoService service) {
+			CategoriaEquipoRepository categoriaEquipoRepository, EquipoService service, EquipoServiceRegis equipoServiceRegis) {
 		this.equipoRepository = equipoRepository;
 		this.tipoEquipoRepository = tipoEquipoRepository;
 		this.marcaEquipoRepository = marcaEquipoRepository;
@@ -63,6 +67,7 @@ public class EquipoController {
 		this.estadoEquipoRepository = estadoEquipoRepository;
 		this.categoriaEquipoRepository = categoriaEquipoRepository;
 		this.service = service;
+		this.equipoServiceRegis = equipoServiceRegis;
 	}
 
 	// LISTAR EQUIPOS
@@ -102,7 +107,24 @@ public class EquipoController {
 		return "views/equipo/formEquipo";
 
 	}
-
+	
+	//eliminar
+	@GetMapping("/eliminar/{idEquipo}")
+	public String eliminarEquipo(@PathVariable Integer idEquipo, Model model) {
+	    try {
+	        service.eliminar(idEquipo);
+	        model.addAttribute("success", "Equipo eliminado correctamente.");
+	    } catch (DataIntegrityViolationException ex) {
+	        // Esto captura errores de clave foránea
+	        model.addAttribute("error", "El equipo no se puede eliminar. " +
+	                                     "Por favor, póngase en contacto con el administrador del sistema.");
+	    } catch (Exception ex) {
+	        // Para capturar cualquier otro error inesperado
+	        model.addAttribute("error", "Ocurrió un error inesperado. Contacte al administrador.");
+	    }
+	    // Redirige a la lista mostrando los mensajes
+	    return "redirect:/equipo";
+	}
 	
 	@PostMapping("/guardar")
 	public String guardarEquipo(
@@ -124,12 +146,22 @@ public class EquipoController {
 	        redirectAttributes.addFlashAttribute("msgSuccess", "Equipo registrado correctamente.");
 	        return "redirect:/equipo/nuevo";
 
+	    } catch (RuntimeException e) {
+	        // Validación, por ejemplo serial duplicado
+	        redirectAttributes.addFlashAttribute("msgError", e.getMessage());
+	        // Volver al formulario con los datos ingresados
+	        return (equipo.getIdEquipo() == null ? "redirect:/equipo/nuevo"
+	                                             : "redirect:/equipo/editar/" + equipo.getIdEquipo());
 	    } catch (Exception e) {
-	        // Captura cualquier error de base de datos o validación
-	        redirectAttributes.addFlashAttribute("msgError", "Error al guardar el equipo: " + e.getMessage());
-	        return "redirect:/equipo/nuevo";
+	        // Otros errores inesperados
+	        redirectAttributes.addFlashAttribute("msgError", 
+	            "Error al guardar el equipo. Contacte al administrador.");
+	        return (equipo.getIdEquipo() == null ? "redirect:/equipo/nuevo"
+	                                             : "redirect:/equipo/editar/" + equipo.getIdEquipo());
 	    }
 	}
+	
+	
 	//Cambiar estados 
 	@GetMapping("/controlEstados")
 	public String mostrarControlEstados(
@@ -179,7 +211,7 @@ public class EquipoController {
 
 	        // 1. Lógica de carga de archivo
 	        if (!archivo.isEmpty()) {
-	            String rootPath = new File("target/uploads/recertificaciones").getAbsolutePath();
+	            String rootPath = new File("uploads/recertificaciones").getAbsolutePath();
 	            File directory = new File(rootPath);
 	            if (!directory.exists()) directory.mkdirs();
 

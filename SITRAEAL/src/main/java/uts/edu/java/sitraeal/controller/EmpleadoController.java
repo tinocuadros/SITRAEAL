@@ -71,7 +71,7 @@ public class EmpleadoController {
 	    if (!archivo.isEmpty()) {
 	        try {
 	            
-	            String rootPath = new File("target/uploads/certificados").getAbsolutePath();
+	            String rootPath = new File("uploads/certificados").getAbsolutePath();
 	            File directory = new File(rootPath);
 	            
 	            // 2. Crear carpetas si no existen

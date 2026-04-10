@@ -29,44 +29,54 @@ public class TrazabilidaController {
 		this.asignacionEquipoRepository = asignacionEquipoRepository;
 		this.historialEstadoRepository = historialEstadoRepository;
 	}
-
 	@GetMapping("/equipo/trazabilidad")
-	public String verTrazabilidad(
-	        @RequestParam(name = "criterio", required = false) String criterio,
-	        @RequestParam(name = "fechaInicio", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
-	        @RequestParam(name = "fechaFin", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin,
-	        Model model) {
-	    
-	    if (criterio == null || criterio.isEmpty())
-	        return "views/trazabilidad/trazabilidad";
+    public String verTrazabilidad(
+            @RequestParam(name = "criterio", required = false) String criterio,
+            @RequestParam(name = "fechaInicio", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @RequestParam(name = "fechaFin", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin,
+            Model model) {
 
-	    Optional<Equipo> equipoOpt = equipoRepository.findBySerial(criterio);
-	    if (equipoOpt.isEmpty() && criterio.matches("\\d+")) {
-	        equipoOpt = equipoRepository.findById(Integer.parseInt(criterio));
-	    }
+        // 1. Si no hay criterio, solo mostrar la página de búsqueda
+        if (criterio == null || criterio.isEmpty()) {
+            return "views/trazabilidad/trazabilidad";
+        }
 
-	    if (equipoOpt.isPresent()) {
-	        Equipo equipo = equipoOpt.get();
-	        model.addAttribute("equipo", equipo);
+        // 2. VALIDACIÓN ESTRICTA: Pedir fechas si faltan
+        if (fechaInicio == null || fechaFin == null) {
+            model.addAttribute("error", "Por favor, seleccione el rango de fechas (Inicio y Fin) para realizar la consulta.");
+            return "views/trazabilidad/trazabilidad";
+        }
 
-	        // Definimos un rango de fechas por defecto para evitar enviar NULL al repositorio
-	        LocalDateTime inicio = (fechaInicio != null) ? fechaInicio.atStartOfDay() 
-	                                                     : LocalDateTime.of(2000, 1, 1, 0, 0);
-	        LocalDateTime fin = (fechaFin != null) ? fechaFin.atTime(23, 59, 59) 
-	                                               : LocalDateTime.now().plusYears(1);
+        // 3. Buscar el Equipo
+        Optional<Equipo> equipoOpt = equipoRepository.findBySerial(criterio.trim().toUpperCase());
 
-	        // Siempre usamos el método 'Between' pasando el rango (si no hay filtros, el rango es gigante)
-	        model.addAttribute("historialEstados",
-	            historialEstadoRepository.findByEquipoIdEquipoAndFechaMovimientoBetweenOrderByFechaMovimientoDesc(
-	                equipo.getIdEquipo(), inicio, fin));
-	        
-	        model.addAttribute("historialAsignaciones", 
-	            asignacionEquipoRepository.findByEquipoIdEquipoAndFechaEntregaBetweenOrderByFechaEntregaDesc(
-	                equipo.getIdEquipo(), inicio, fin));
+     // Si no se encontró por serial, intentamos por ID
+        if (equipoOpt.isEmpty() && criterio.matches("\\d+")) {
+            equipoOpt = equipoRepository.findById(Integer.parseInt(criterio));
+        }
 
-	    } else {
-	        model.addAttribute("error", "No se encontró información para: " + criterio);
-	    }
+        if (equipoOpt.isPresent()) {
+            Equipo equipo = equipoOpt.get();
+            model.addAttribute("equipo", equipo);
 
-	    return "views/trazabilidad/trazabilidad";
-	}}
+            // 4. Convertir LocalDates a LocalDateTimes para cubrir el día completo
+            LocalDateTime inicio = fechaInicio.atStartOfDay();
+            LocalDateTime fin = fechaFin.atTime(23, 59, 59);
+
+            // 5. Consultas filtradas por rango de fecha
+            model.addAttribute("historialEstados",
+                historialEstadoRepository.findByEquipoIdEquipoAndFechaMovimientoBetweenOrderByFechaMovimientoDesc(
+                    equipo.getIdEquipo(), inicio, fin));
+
+            model.addAttribute("historialAsignaciones",
+                asignacionEquipoRepository.findByEquipoIdEquipoAndFechaEntregaBetweenOrderByFechaEntregaDesc(
+                    equipo.getIdEquipo(), inicio, fin));
+
+        } else {
+            model.addAttribute("error", "No se encontró el equipo con el Serial: " + criterio);
+        }
+
+        return "views/trazabilidad/trazabilidad";
+    }
+}
+	

@@ -2,268 +2,230 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
-<title>Registro de Equipos de Alturas | SITRAEAL</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestión de Equipos | SITRAEAL</title>
 
-<!-- Bootstrap -->
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-	rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-<!-- Bootstrap Icons -->
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
-	rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
 <style>
-body {
-	background: linear-gradient(rgba(0, 0, 0, .5), rgba(0, 0, 0, .5)),
-		url('/img/fondo-home.jpg') no-repeat center center fixed;
-	background-size: cover;
-}
+    body {
+        background: linear-gradient(rgba(0, 0, 0, .6), rgba(0, 0, 0, .6)),
+            url('/img/fondo-home.jpg') no-repeat center center fixed;
+        background-size: cover;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-.card {
-	border-radius: 15px;
-	box-shadow: 0 10px 30px rgba(0, 0, 0, .4);
-}
+    .card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, .5);
+        overflow: hidden;
+    }
 
-.card-header {
-	background-color: #16633a;
-	color: white;
-	border-radius: 15px 15px 0 0;
-}
+    .card-header {
+        background-color: #16633a; /* Verde Institucional UTS */
+        color: white;
+        padding: 1.5rem;
+    }
 
-.form-control:focus {
-	background-color: white;
-	box-shadow: none;
-}
+    .login-box {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #34495e;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #16633a;
+        box-shadow: 0 0 0 0.25rem rgba(22, 99, 58, 0.25);
+    }
+
+    .btn-success {
+        background-color: #16633a;
+        border: none;
+    }
+
+    .btn-success:hover {
+        background-color: #0e4426;
+    }
+
+    .section-title {
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 0.5rem;
+    }
 </style>
 </head>
 
 <body>
 
-	<div class="container mt-5">
-		<div class="row justify-content-center">
-			<div class="col-lg-8">
+    <div class="container mt-4 mb-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
 
-				<!-- ALERTA ÉXITO -->
-				<div th:if="${msgSuccess}"
-					class="alert alert-success alert-dismissible fade show">
+                <div th:if="${msgSuccess}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <strong th:text="${msgSuccess}"></strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
 
-					<i class="bi bi-check-circle-fill"></i> <br>
+                <div th:if="${msgError}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <strong th:text="${msgError}"></strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
 
-					<!-- ID GRANDE -->
-					<span class="fs-3 fw-bold text-primary" th:text="${msgSuccess}"></span>
+                <div class="card">
+                    <div class="card-header text-center">
+                        <img src="/img/logo.jpg" width="60" alt="Logo SITRAEAL" class="mb-2 rounded-circle shadow-sm">
+                        <h3 class="mb-0">
+                            <i th:class="${equipo.idEquipo != null} ? 'bi bi-pencil-square' : 'bi bi-plus-circle-fill'"></i>
+                            <span th:text="${equipo.idEquipo != null} ? ' Editar Equipo de Alturas' : ' Registro de Nuevo Equipo'"></span>
+                        </h3>
+                        <small class="opacity-75">Gestión Normativa según Resolución 4272 de 2021</small>
+                    </div>
 
-					<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-				</div>
+                    <div class="card-body p-4">
+                        <form th:action="@{/equipo/guardar}" th:object="${equipo}" method="post">
+                            
+                            <input type="hidden" th:field="*{idEquipo}" />
 
-				<!-- ALERTA ERROR -->
-				<div th:if="${msgError}"
-					class="alert alert-danger alert-dismissible fade show">
+                            <h5 class="section-title text-primary mb-3">
+                                <i class="bi bi-briefcase-fill me-2"></i>Información de Adquisición
+                            </h5>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">Proveedor</label>
+                                    <select th:field="*{proveedor}" class="form-select" required>
+                                        <option value="">Seleccione el proveedor...</option>
+                                        <option th:each="p : ${Proveedor}" th:value="${p.idProveedor}" th:text="${p.nombre}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Número de Factura</label>
+                                    <input type="text" th:field="*{numeroFactura}" class="form-control" placeholder="Ej: FAC-12345" required>
+                                </div>
+                            </div>
 
-					<i class="bi bi-exclamation-triangle-fill"></i> <span
-						th:text="${msgError}"></span>
+                            <h5 class="section-title text-primary mb-3">
+                                <i class="bi bi-gear-wide-connected me-2"></i>Especificaciones del Equipo
+                            </h5>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Categoría</label>
+                                    <select th:field="*{categoria}" class="form-select" required>
+                                        <option value="">Seleccione...</option>
+                                        <option th:each="c : ${CategoriaEquipo}" th:value="${c.idCategoria}" th:text="${c.nombre}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Tipo de Equipo</label>
+                                    <select th:field="*{tipo}" class="form-select" required>
+                                        <option value="">Seleccione...</option>
+                                        <option th:each="t : ${TipoEquipo}" th:value="${t.idTipo}" th:text="${t.nombre}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Marca</label>
+                                    <select th:field="*{marca}" class="form-select" required>
+                                        <option value="">Seleccione...</option>
+                                        <option th:each="m : ${MarcaEquipo}" th:value="${m.idMarca}" th:text="${m.nombre}"></option>
+                                    </select>
+                                </div>
+                            </div>
 
-					<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-				</div>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-4">
+                                    <label class="form-label">Norma Técnica</label>
+                                    <select th:field="*{norma}" class="form-select" required>
+                                        <option value="">Seleccione...</option>
+                                        <option th:each="n : ${Norma}" th:value="${n.idNorma}" th:text="${n.nombre}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Estado Actual</label>
+                                    <select th:field="*{estado}" class="form-select" required>
+                                        <option value="">Seleccione...</option>
+                                        <option th:each="e : ${EstadoEquipo}" th:value="${e.idEstado}" th:text="${e.nombre}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Lote de Fabricación</label>
+                                    <input type="text" th:field="*{lote}" class="form-control" placeholder="Ej: LT-2024" required>
+                                </div>
+                            </div>
 
+                            <h5 class="section-title text-primary mb-3">
+                                <i class="bi bi-calendar-check me-2"></i>Trazabilidad y Vigencia
+                            </h5>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">Número de Serial (Único)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="bi bi-hash"></i></span>
+                                        <input type="text" th:field="*{serial}" class="form-control fw-bold" placeholder="Ingrese serial" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Fecha de Fabricación</label>
+                                    <input type="date" th:field="*{fechaFabricacion}" class="form-control" required>
+                                </div>
+                            </div>
 
-				<!-- CARD -->
-				<div class="login-box">
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">Última Certificación</label>
+                                    <input type="date" th:field="*{fechaCertificacion}" class="form-control" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label text-danger">Fecha de Vencimiento Anual</label>
+                                    <input type="date" th:field="*{fechaVencimiento}" class="form-control border-danger" required>
+                                </div>
+                            </div>
 
-					<!-- Logo -->
-					<div class="text-center mb-3">
-						<img src="/img/logo.jpg" width="70" alt="Logo" class="mb-2">
-						<h4 class="login-title mb-0">SITRAEAL</h4>
-						<small class="text-muted">Sistema de Trazabilidad para
-							Equipos de Alturas</small>
-					</div>
+                            <h5 class="section-title text-primary mb-3">
+                                <i class="bi bi-chat-left-text me-2"></i>Observaciones Adicionales
+                            </h5>
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <textarea th:field="*{observaciones}" class="form-control" rows="3" placeholder="Detalles sobre el estado físico, componentes o recomendaciones del fabricante..."></textarea>
+                                </div>
+                            </div>
 
+                            <div class="row g-3 mt-2">
+                                <div class="col-md-6">
+                                    <button type="submit" class="btn btn-success w-100 py-3 shadow-sm fw-bold">
+                                        <i class="bi bi-save-fill me-2"></i>
+                                        <span th:text="${equipo.idEquipo != null} ? 'ACTUALIZAR DATOS' : 'REGISTRAR EN SISTEMA'"></span>
+                                    </button>
+                                </div>
+                                <div class="col-md-6">
+                                    <a th:href="@{/equipo}" class="btn btn-outline-secondary w-100 py-3 fw-bold">
+                                        <i class="bi bi-arrow-left-circle me-2"></i> CANCELAR / VOLVER
+                                    </a>
+                                </div>
+                            </div>
 
-					<div class="card">
-						<div class="card-header text-center">
-							<h4>
-								<i class="bi bi-person-plus-fill"></i> Registro de Nuevos
-								Equipos
-							</h4>
-						</div>
+                        </form>
+                    </div>
+                </div>
 
-						<div class="card-body">
-							<form th:action="@{/equipo/guardar}" th:object="${equipo}" method="post">
+                <div class="text-center mt-4">
+                    <a th:href="@{/}" class="text-white text-decoration-none">
+                        <i class="bi bi-house-door-fill me-1"></i> Panel Principal SITRAEAL
+                    </a>
+                </div>
 
+            </div>
+        </div>
+    </div>
 
-								<!-- DATOS DEL PROVEEDOR -->
-								<h6 class="fw-bold text-primary mb-3 mt-4">
-									<i class="bi bi-box-seam "></i> Datos del Proveedor
-								</h6>
-
-								<div class="row mb-3">
-									<!-- PROVEEDOR -->
-									<div class="col-md-6">
-										<label class="form-label">Proveedor</label> <select
-											th:field="*{proveedor}" class="form-select" required>
-											<option value="">Seleccione</option>
-											<option th:each="p : ${Proveedor}"
-												th:value="${p.idProveedor}" th:text="${p.nombre}"></option>
-										</select>
-									</div>
-
-									<!-- NÚMERO DE FACTURA -->
-									<div class="col-md-6">
-										<label class="form-label">Número de factura</label> <input
-											type="text" th:field="*{numeroFactura}" class="form-control"
-											required>
-									</div>
-								</div>
-
-
-
-								<!-- DATOS GENERALES -->
-								<h6 class="fw-bold text-primary mb-3">
-									<i class="bi bi-box-seam"></i> Datos del Equipo
-								</h6>
-
-
-
-								<div class="row mb-3">
-									<!-- CATEGORÍA -->
-									<div class="col-md-6">
-										<label class="form-label">Categoría</label> <select
-											th:field="*{categoria}" class="form-select" required>
-											<option value="">Seleccione</option>
-											<option th:each="c : ${CategoriaEquipo}"
-												th:value="${c.idCategoria}" th:text="${c.nombre}"></option>
-										</select>
-									</div>
-
-									<!-- TIPO DE EQUIPO -->
-									<div class="col-md-6">
-										<label class="form-label">Tipo de equipo</label> <select
-											th:field="*{tipo}" class="form-select" required>
-											<option value="">Seleccione</option>
-											<option th:each="t : ${TipoEquipo}" th:value="${t.idTipo}"
-												th:text="${t.nombre}"></option>
-										</select>
-									</div>
-								</div>
-
-								<div class="row mb-3">
-									<!-- MARCA -->
-									<div class="col-md-6">
-										<label class="form-label">Marca</label> <select
-											th:field="*{marca}" class="form-select" required>
-											<option value="">Seleccione</option>
-											<option th:each="m : ${MarcaEquipo}" th:value="${m.idMarca}"
-												th:text="${m.nombre}"></option>
-										</select>
-									</div>
-
-									<!-- NORMA -->
-									<div class="col-md-6">
-										<label class="form-label">Norma</label> <select
-											th:field="*{norma}" class="form-select" required>
-											<option value="">Seleccione</option>
-											<option th:each="n : ${Norma}" th:value="${n.idNorma}"
-												th:text="${n.nombre}"></option>
-										</select>
-									</div>
-								</div>
-
-								<div class="row mb-3">
-									<!-- ESTADO DEL EQUIPO -->
-									<div class="col-md-6">
-										<label class="form-label">Estado del equipo</label> <select
-											th:field="*{estado}" class="form-select" required>
-											<option value="">Seleccione</option>
-											<option th:each="e : ${EstadoEquipo}"
-												th:value="${e.idEstado}" th:text="${e.nombre}"></option>
-										</select>
-									</div>
-
-									<!-- LOTE -->
-									<div class="col-md-6">
-										<label class="form-label">Lote</label> <input type="text"
-											th:field="*{lote}" class="form-control" required>
-									</div>
-								</div>
-
-								<div class="row mb-3">
-									<!-- SERIAL -->
-									<div class="col-md-6">
-										<label class="form-label">Serial</label> <input type="text"
-											th:field="*{serial}" class="form-control" required>
-									</div>
-
-									<!-- FECHA DE FABRICACIÓN -->
-									<div class="col-md-4">
-										<label class="form-label">Fabricación</label> <input
-											type="date" th:field="*{fechaFabricacion}"
-											class="form-control" required>
-									</div>
-
-									<!-- FECHA DE CERTIFICACIÓN -->
-									<div class="col-md-4">
-										<label class="form-label">Certificación</label> <input
-											type="date" th:field="*{fechaCertificacion}"
-											class="form-control">
-									</div>
-
-									<!-- FECHA DE VENCIMIENTO -->
-									<div class="col-md-4">
-										<label class="form-label">Vencimiento</label> <input
-											type="date" th:field="*{fechaVencimiento}"
-											class="form-control" required>
-									</div>
-								</div>
-
-
-							
-								<!-- OBSERVACIONES -->
-								<h6 class="fw-bold text-primary mb-3 mt-4">
-									<i class="bi bi-file-earmark-text"></i> Observaciones
-								</h6>
-
-								<div class="row mb-4">
-									<div class="col-md-12">
-										<label class="form-label">Observaciones</label>
-										<textarea th:field="*{observaciones}" class="form-control"
-											rows="4"></textarea>
-									</div>
-								</div>
-
-								<div class="row mt-4 g-3">
-									<div class="col-md-6">
-										<button type="submit"
-											class="btn btn-success w-100 py-2 shadow-sm fw-bold">
-											<i class="bi bi-save2-fill me-2"></i> Registrar Equipo
-										</button>
-									</div>
-
-
-
-									<div class="col-12 mt-4">
-										<div class="d-flex justify-content-center">
-											<a th:href="@{/}"
-												class="btn btn-link text-decoration-none text-muted"> <i
-												class="bi bi-house-door me-1"></i> Volver al Menú Principal
-											</a>
-										</div>
-									</div>
-								</div>
-
-							</form>
-
-
-						</div>
-
-					</div>
-
-				</div>
-			</div>
-		</div>
-
-		<script
-			src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-	</div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

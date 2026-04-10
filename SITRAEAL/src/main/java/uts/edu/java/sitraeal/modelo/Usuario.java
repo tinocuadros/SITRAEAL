@@ -1,6 +1,7 @@
 package uts.edu.java.sitraeal.modelo;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -39,6 +40,12 @@ public class Usuario {
 	@ManyToOne
 	@JoinColumn(name = "id_rol")
 	private Rol rol;
+	
+	@Column(name = "reset_password_token", length = 45)
+	private String resetPasswordToken;
+
+	@Column(name = "token_expiration")
+	private LocalDateTime tokenExpiration;
 
 	@Column(name = "fecha_nacimiento")
 	private LocalDate fechaNacimiento;
@@ -52,7 +59,8 @@ public class Usuario {
 	}
 
 	public Usuario(Integer idUsuario, String nombre, String apellidos, String correo, String telefono, String direccion,
-			String contrasena, Rol rol, LocalDate fechaNacimiento, LocalDate fechaIngreso) {
+			String contrasena, Rol rol, String resetPasswordToken, LocalDateTime tokenExpiration,
+			LocalDate fechaNacimiento, LocalDate fechaIngreso) {
 		super();
 		this.idUsuario = idUsuario;
 		this.nombre = nombre;
@@ -62,12 +70,12 @@ public class Usuario {
 		this.direccion = direccion;
 		this.contrasena = contrasena;
 		this.rol = rol;
+		this.resetPasswordToken = resetPasswordToken;
+		this.tokenExpiration = tokenExpiration;
 		this.fechaNacimiento = fechaNacimiento;
 		this.fechaIngreso = fechaIngreso;
 	}
 
-	
-	//Getters and Setters
 	public Integer getIdUsuario() {
 		return idUsuario;
 	}
@@ -130,6 +138,22 @@ public class Usuario {
 
 	public void setRol(Rol rol) {
 		this.rol = rol;
+	}
+
+	public String getResetPasswordToken() {
+		return resetPasswordToken;
+	}
+
+	public void setResetPasswordToken(String resetPasswordToken) {
+		this.resetPasswordToken = resetPasswordToken;
+	}
+
+	public LocalDateTime getTokenExpiration() {
+		return tokenExpiration;
+	}
+
+	public void setTokenExpiration(LocalDateTime tokenExpiration) {
+		this.tokenExpiration = tokenExpiration;
 	}
 
 	public LocalDate getFechaNacimiento() {

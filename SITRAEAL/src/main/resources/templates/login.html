@@ -117,10 +117,14 @@ body {
 
 			<!-- Links -->
 			<div class="links text-center mt-3">
-				<a th:href="@{/usuario/nuevo}"> Registrar nuevo usuario </a> <br>
-				<a href="/recuperar-password">¿Olvidaste tu contraseña?</a>
-			</div>
-
+    <a th:href="@{/usuario/nuevo}" class="btn btn-link text-decoration-none"> 
+        <i class="bi bi-person-plus"></i> Registrar nuevo usuario 
+    </a> 
+    <br>
+    <a th:href="@{/forgot_password}" class="btn btn-link text-decoration-none text-success">
+    <i class="bi bi-key"></i> ¿Olvidaste tu contraseña?
+</a>
+</div>
 		</form>
 
 	</div>

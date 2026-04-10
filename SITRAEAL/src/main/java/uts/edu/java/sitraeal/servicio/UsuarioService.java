@@ -12,4 +12,10 @@ public interface UsuarioService {
 	    void guardar(Usuario usuario);
 	    void eliminar(Integer idUsuario);
 
+	 // --- NUEVOS MÉTODOS PARA RECUPERACIÓN DE CONTRASEÑA ---
+	    
+	   
+	    String actualizarTokenContrasena(String correo);
+	    Usuario obtenerPorToken(String token);
+	    void actualizarContrasena(Usuario usuario, String nuevaContrasena);
 }

@@ -12,6 +12,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
 
     Optional<Usuario> findByCorreo(String correo);
     boolean existsById(Integer idUsuario); // valida que el usuario no exita en la BD
-   
+    Optional<Usuario> findByResetPasswordToken(String token);
+    
 }
 
