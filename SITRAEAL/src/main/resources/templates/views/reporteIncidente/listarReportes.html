@@ -6,40 +6,17 @@
     <title>Historial de Reportes | SITRAEAL</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
-        body {
-            background-color: #f4f7f6;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .header-section {
-            background-color: white;
-            padding: 2rem 0;
-            margin-bottom: 2rem;
-            border-bottom: 1px solid #dee2e6;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
-        .table-container {
-            background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-            overflow: hidden;
-            border: none;
-        }
-        .thead-dark {
-            background-color: #212529;
-            color: white;
-        }
-        .badge-alta { background-color: #dc3545; }
-        .badge-media { background-color: #ffc107; color: #212529; }
-        .badge-baja { background-color: #198754; }
-        .btn-inicio {
-            transition: all 0.3s ease;
-        }
-        .btn-inicio:hover {
-            transform: translateX(-5px);
-        }
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .header-section { background-color: white; padding: 2rem 0; margin-bottom: 2rem; border-bottom: 1px solid #dee2e6; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .table-container { background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; }
+        .thead-dark { background-color: #212529; color: white; }
+        .badge-alta { background-color: #dc3545; color: white; }
+        .badge-media { background-color: #ffc107; color: #000; }
+        .badge-baja { background-color: #198754; color: white; }
+        .btn-inicio:hover { transform: translateX(-5px); transition: all 0.3s ease; }
     </style>
 </head>
 <body>
@@ -83,37 +60,79 @@
                     <tbody>
                         <tr th:each="r : ${reportes}">
                             <td class="ps-4 fw-bold" th:text="${r.idReporte}"></td>
-                            
                             <td th:text="${#temporals.format(r.fechaSuceso, 'dd/MM/yyyy HH:mm')}"></td>
-                            
                             <td>
                                 <span class="badge bg-secondary text-uppercase" th:text="${r.tipo}"></span>
                             </td>
-                            
                             <td>
                                 <span th:text="${r.gravedad}" 
                                       th:classappend="${r.gravedad == 'ALTA' ? 'badge badge-alta' : 
-                                                       (r.gravedad == 'MEDIA' ? 'badge badge-media' : 'badge badge-baja')}">
+                                                       (r.gravedad == 'MEDIA' ? 'badge badge-media' : 'badge badge-baja')}"
+                                      class="badge p-2">
                                 </span>
                             </td>
-                            
                             <td>
                                 <div class="d-flex flex-column">
-                                    <span class="fw-bold" th:text="${r.equipo.serial}"></span>
-                                    <small class="text-muted" th:text="${'Lote: ' + r.equipo.lote}"></small>
+                                    <span class="fw-bold" th:text="${r.equipo?.serial}"></span>
+                                    <small class="text-muted" th:text="${'Lote: ' + r.equipo?.lote}"></small>
                                 </div>
                             </td>
-                            
-                            <td th:text="${r.empleado.nombres + ' ' + r.empleado.apellidos}"></td>
+                            <td th:text="${r.empleado?.nombres + ' ' + r.empleado?.apellidos}"></td>
                             
                             <td class="text-center">
                                 <div class="btn-group">
-                                    <button class="btn btn-sm btn-outline-primary" title="Ver Detalles">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" 
+                                            data-bs-toggle="modal" 
+                                            th:data-bs-target="'#modalReporte' + ${r.idReporte}">
                                         <i class="bi bi-eye"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-outline-danger" title="Eliminar">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
+                                    
+                                </div>
+
+                                <div class="modal fade" th:id="'modalReporte' + ${r.idReporte}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                                        <div class="modal-content border-0 shadow text-start">
+                                            <div class="modal-header bg-dark text-white">
+                                                <h5 class="modal-title">
+                                                    <i class="bi bi-info-circle me-2"></i> 
+                                                    Detalle del Reporte #<span th:text="${r.idReporte}"></span>
+                                                </h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body p-4">
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <p class="mb-1 text-muted small text-uppercase fw-bold">Fecha del Suceso</p>
+                                                        <p class="fw-bold" th:text="${#temporals.format(r.fechaSuceso, 'dd/MM/yyyy HH:mm')}"></p>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <p class="mb-1 text-muted small text-uppercase fw-bold">Gravedad del Evento</p>
+                                                        <p th:text="${r.gravedad}" class="fw-bold"></p>
+                                                    </div>
+                                                    <div class="col-12 border-top pt-3">
+                                                        <p class="mb-2 text-muted small text-uppercase fw-bold">Descripción / Hallazgo</p>
+                                                        <div class="p-3 bg-light rounded border">
+                                                            <p class="mb-0" th:text="${r.descripcion != null ? r.descripcion : 'No hay descripción.'}"></p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6 mt-4">
+                                                        <p class="mb-1 text-muted small text-uppercase fw-bold">Equipo</p>
+                                                        <p class="mb-0" th:text="${r.equipo?.serial + ' - ' + r.equipo?.tipo?.nombre}"></p>
+                                                    </div>
+                                                    <div class="col-md-6 mt-4">
+                                                        <p class="mb-1 text-muted small text-uppercase fw-bold">Reportado por</p>
+                                                        <p class="mb-0" th:text="${r.empleado?.nombres + ' ' + r.empleado?.apellidos}"></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer bg-light">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                                <button type="button" class="btn btn-dark" onclick="window.print()">
+                                                    <i class="bi bi-printer me-1"></i> Imprimir
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
