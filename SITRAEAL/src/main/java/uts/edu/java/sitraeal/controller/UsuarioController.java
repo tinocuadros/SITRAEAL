@@ -19,7 +19,7 @@ public class UsuarioController {
     @GetMapping
     public String listarUsuarios(Model model) {
         model.addAttribute("usuarios", service.listar());
-        return "views/usuario/index";
+        return "views/usuario";
     }
 
     // MOSTRAR FORMULARIO
